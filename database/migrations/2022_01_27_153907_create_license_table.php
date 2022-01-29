@@ -14,14 +14,9 @@ class CreateLicenseTable extends Migration
     public function up()
     {
         Schema::create('license', function (Blueprint $table) {
-            $table->string('license')->index();
-            $table->string('first_name');
-            $table->string('last_name');
-            $table->string('display_name');
-            $table->string('phone');
-            $table->string('email');
-            $table->text('address');
-            $table->timestamp('created_at');
+            $table->string('serial', 255)->index()->unique();
+            $table->longText('token');
+            $table->timestamps();
         });
     }
 

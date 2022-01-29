@@ -27,6 +27,8 @@ Route::group([
 ], function ($router) {
 
     Route::get('license/check', [LicenseController::class, 'checkLicense']);
+    Route::post('license/activate', [LicenseController::class, 'activate']);
+    Route::post('license/save-token', [LicenseController::class, 'saveToken']);
     
     Route::group([
         'prefix' => 'auth'

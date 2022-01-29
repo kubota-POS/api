@@ -5,6 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+use \Carbon\Carbon;
+use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Support\Facades\Crypt;
+
 class LicenseModel extends Model
 {
     use HasFactory;
@@ -12,13 +16,7 @@ class LicenseModel extends Model
     protected $table = 'license';
 
     protected $fillable = [
-        'license', 'first_name', 'last_name', 'display_name', 'phone', 'email', 'address'
+        'serial', 'token'
     ];
-
-
-    public function checkLicense() {
-
-    }
-
 
 }
