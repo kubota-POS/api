@@ -73,6 +73,11 @@ class LicenseController extends Controller
 
         $licnese = LicenseModel::get()->first();
 
+        if($licnese) {
+            $response = ApiResponse::BedRequest('license key is already exist');
+            return response()->json($response['json'], $response['status']); 
+        }
+
         $response = LicenseValidator::store($input);
         $data = $response['json']['data'];
 

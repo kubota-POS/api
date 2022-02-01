@@ -37,9 +37,9 @@ Route::group([
         Route::post('/register', [AuthController::class, 'register']);
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::post('/refresh', [AuthController::class, 'refresh']);
-        Route::get('/profile', [AuthController::class, 'userProfile']);   
+        Route::get('/profile', [AuthController::class, 'userProfile']);
+        Route::get('/check', [AuthController::class, 'check']);
     });
-    
 });
 
 Route::any('{any}', function() {

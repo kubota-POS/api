@@ -64,4 +64,14 @@ class ApiResponse {
             "status" => 500
         ];
     }
+
+    public function Unauthorized($message) {
+        return [
+            "json" => [
+                'success' => false,
+                'message' => $message ? $message : 'unauthorized'
+            ],
+            "status" => 401
+        ];
+    }
 }
