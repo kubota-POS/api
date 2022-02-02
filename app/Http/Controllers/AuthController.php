@@ -110,7 +110,8 @@ class AuthController extends Controller
      * Get the authenticated User.
     */
     public function userProfile(Request $request) {
-        $response = ApiResponse::Success([ 'user' => auth()->user() ], 'login user information');
+        $user = auth()->user();
+        $response = ApiResponse::Success($user, 'login user information');
         return response()->json($response['json'], $response['status']);
     }
 
@@ -125,7 +126,7 @@ class AuthController extends Controller
             return response()->json($response['json'], $response['status']);
         }
 
-        $response = ApiResponse::Success([ 'user' => $user ], 'first user account');
+        $response = ApiResponse::Success(['user' => $user], 'first user account');
         return response()->json($response['json'], $response['status']);
     }
 
@@ -140,9 +141,8 @@ class AuthController extends Controller
                 'account' => auth()->user(),
                 'access_token' => $token,
                 'token_type' => 'bearer',
-                'expires_in' => auth()->factory()->getTTL() * 1
+                'expires_in' => auth()->factory()->getTTL() * 60
             ]
-
         ]);
     }
 

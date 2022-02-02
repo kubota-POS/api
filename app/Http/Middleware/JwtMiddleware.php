@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use JWTAuth;
 use Exception;
 use Tymon\JWTAuth\Http\Middleware\BaseMiddleware;
-use \Carbon\Carbon;
+use App\HttpResponse\ApiResponse;
 
 class JwtMiddleware extends BaseMiddleware
 {
@@ -28,34 +28,22 @@ class JwtMiddleware extends BaseMiddleware
 
         } catch(Exception $e) {
             if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Token Invalid',
-                    'date' => Carbon::now()->format('Y-m-d H:i:s')
-                ], 401);
+                $response = ApiResponse::Unauthorized('Token Invalid');
+                return response()->json($response['json'],$response['status']);
             }
 
             if($e instanceof \Tymon\JWTAuth\Exceptions\TokenExpiredException) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Token Expired',
-                    'date' => Carbon::now()->format('Y-m-d H:i:s')
-                ], 422);
+                $response = ApiResponse::Unauthorized('Token Expired');
+                return response()->json($response['json'],$response['status']);
             }
 
             if($e->getMessage() === 'User Not Found') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'User not found',
-                    'date' => Carbon::now()->format('Y-m-d H:i:s')
-                ], 400);
+                $response = ApiResponse::NotFound('User not found');
+                return response()->json($response['json'],$response['status']);
             }
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Authorization Token not found',
-                'date' => Carbon::now()->format('Y-m-d H:i:s')
-            ], 422); 
+            $response = ApiResponse::UnProcess('Authorization Token not found');
+            return response()->json($response['json'],$response['status']);
         }
 
         return $next($request);
