@@ -4,9 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-use \Carbon\Carbon;
 use Validator;
-
 use App\Models\LicenseModel;
 use App\Validations\LicenseValidator;
 use App\HttpResponse\ApiResponse;

@@ -7,6 +7,7 @@ use \Carbon\Carbon;
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LicenseController;
+use App\Http\Controllers\ShopController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -39,6 +40,14 @@ Route::group([
         Route::post('/refresh', [AuthController::class, 'refresh']);
         Route::get('/profile', [AuthController::class, 'userProfile']);
         Route::get('/check', [AuthController::class, 'check']);
+    });
+
+    Route::group([
+        'prefix' => 'shop'
+    ], function ($router) {
+        Route::post('', [ShopController::class, 'create']);
+        Route::get('', [ShopController::class, 'index']);
+        Route::put('/{id}', [ShopController::class, 'update']);
     });
 });
 
