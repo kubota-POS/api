@@ -8,6 +8,8 @@ use \Carbon\Carbon;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LicenseController;
 use App\Http\Controllers\ShopController;
+use App\Http\Controllers\NumberSpecificationController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -48,6 +50,15 @@ Route::group([
         Route::post('', [ShopController::class, 'create']);
         Route::get('', [ShopController::class, 'index']);
         Route::put('/{id}', [ShopController::class, 'update']);
+    });
+
+    Route::group([
+        'prefix' => 'number-specification'
+    ], function ($router) {
+        Route::get('', [NumberSpecificationController::class, 'index']);
+        Route::get('/check', [NumberSpecificationController::class, 'check']);
+        Route::put('/{id}', [NumberSpecificationController::class, 'update']);
+        Route::put('/active/{id}', [NumberSpecificationController::class, 'active']);
     });
 });
 

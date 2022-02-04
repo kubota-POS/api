@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateLicenseTable extends Migration
+class CreateNumberSpecificationTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,11 @@ class CreateLicenseTable extends Migration
      */
     public function up()
     {
-        Schema::create('license', function (Blueprint $table) {
-            $table->string('serial', 255)->index()->unique();
-            $table->longText('token');
+        Schema::create('number_specification', function (Blueprint $table) {
+            $table->id();
+            $table->integer('set_number')->unique();
+            $table->string('set_char')->nullable()->unique();
+            $table->boolean('active')->default(false);
             $table->timestamps();
         });
     }
@@ -27,6 +29,6 @@ class CreateLicenseTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('license');
+        Schema::dropIfExists('number_specification');
     }
 }

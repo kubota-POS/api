@@ -28,7 +28,7 @@ class LicenseController extends Controller
             return response()->json($check['json'], $check['status']);
 
         } catch(QueryException $e) {
-            $response = ApiResponse::Unknown('unknown error');
+            $response = ApiResponse::Unknown('someting was wrong');
             return response()->json($response['json'], $response['status']);
         }
     }
@@ -94,7 +94,7 @@ class LicenseController extends Controller
             return response()->json($response['json'], $response['status']);
 
         } catch(QueryException $e) {
-            $response = ApiResponse::UnProcess('serial number is already exist');
+            $response = ApiResponse::Unknown('someting was wrong');
             return response()->json($response['json'], $response['status']);
         }
     }

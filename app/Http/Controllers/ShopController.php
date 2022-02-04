@@ -34,8 +34,8 @@ class ShopController extends Controller
         $validator = Validator::make($input, [
             "name" => 'required',
             "description" => 'required',
-            "email" => 'required',
-            'phone' => 'required',
+            "email" => 'required|email',
+            'phone' => 'required|numeric',
             'address' => 'required'
         ]);
 
@@ -72,6 +72,16 @@ class ShopController extends Controller
     public function update(Request $request) {
         $id = $request->id;
         $input = $request->only(['name', 'description', 'email', 'phone', 'address']);
+
+        $validator = Validator::make($input, [
+            "email" => 'email',
+            'phone' => 'numeric'
+        ]);
+
+        if ($validator->fails()) {
+            $response = ApiResponse::BedRequest($validator->errors()->first());
+            return response()->json($response['json'], $response['status']);
+        }
 
         $shop = ShopModel::find($id);
 
