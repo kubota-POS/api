@@ -3,12 +3,14 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-use \Carbon\Carbon;
-
+use App\HttpResponse\ApiResponse;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LicenseController;
+use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\NumberSpecificationController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\HistoryLogController;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,7 +34,15 @@ Route::group([
     Route::get('license/check', [LicenseController::class, 'checkLicense']);
     Route::post('license/activate', [LicenseController::class, 'activate']);
     Route::post('license/save-token', [LicenseController::class, 'saveToken']);
+    Route::get('license/device', [LicenseController::class, 'device']);
     
+    Route::group([
+        'prefix' => 'device'
+    ], function ($router) {
+        Route::get('/first', [DeviceController::class, 'first']);
+        Route::post('/first', [DeviceController::class, 'firstDeviceCreate']);
+    });
+
     Route::group([
         'prefix' => 'auth'
     ], function ($router) {
@@ -58,14 +68,27 @@ Route::group([
         Route::get('', [NumberSpecificationController::class, 'index']);
         Route::get('/check', [NumberSpecificationController::class, 'check']);
         Route::put('/{id}', [NumberSpecificationController::class, 'update']);
-        Route::put('/active/{id}', [NumberSpecificationController::class, 'active']);
+    });
+
+    Route::group([
+        'prefix' => 'category'
+    ], function ($router) {
+        Route::get('', [CategoryController::class, 'index']);
+        Route::get('/{id}', [CategoryController::class, 'category']);
+        Route::post('', [CategoryController::class, 'create']);
+        Route::put('/{id}', [CategoryController::class, 'update']);
+        Route::delete('/{id}', [CategoryController::class, 'delete']);
+    });
+
+    Route::group([
+        'prefix' => 'history-log'
+    ], function ($router) {
+        Route::get('/{type}', [HistoryLogController::class, 'index']);
+        Route::post('', [HistoryLogController::class, 'create']);
     });
 });
 
 Route::any('{any}', function() {
-    return response()->json([
-    	'success' => false,
-        'message' => 'Resource not found',
-        'date' => Carbon::now()->format('Y-m-d H:i:s')
-    ], 404);
+    $response = ApiResponse::NotFound('Resource Not Found');
+    return response()->json($response['json'], $response['status']);
 })->where('any', '.*');

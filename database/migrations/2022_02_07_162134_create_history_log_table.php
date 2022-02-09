@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateNumberSpecificationTable extends Migration
+class CreateHistoryLogTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,12 @@ class CreateNumberSpecificationTable extends Migration
      */
     public function up()
     {
-        Schema::create('number_specification', function (Blueprint $table) {
+        Schema::create('history_log', function (Blueprint $table) {
             $table->id();
-            $table->integer('set_number')->unique();
-            $table->string('set_char')->nullable()->unique();
+            $table->foreignId('user_id');
+            $table->string('type');
+            $table->string('action');
+            $table->text('description');
             $table->timestamps();
         });
     }
@@ -28,6 +30,6 @@ class CreateNumberSpecificationTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('number_specification');
+        Schema::dropIfExists('history_log');
     }
 }

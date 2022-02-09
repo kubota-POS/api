@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Validator;
+use Carbon\Carbon;
 use App\Models\NumberSpecificationModel;
-use App\Validations\LicenseValidator;
+use App\Models\HistoryLogModel;
+use Illuminate\Support\Facades\Auth;
 use App\HttpResponse\ApiResponse;
 use Illuminate\Database\QueryException;
 
@@ -46,6 +48,7 @@ class NumberSpecificationController extends Controller
     public function update(Request $request) {
         $id = $request->id;
         $input = $request->only(['set_char']);
+        $user = Auth::user();
 
         $validator = Validator::make($input, [
             "set_char" => 'required|unique:number_specification|max:1|min:1|alpha'
@@ -57,39 +60,25 @@ class NumberSpecificationController extends Controller
         }
 
         $input['set_char'] = strtoupper($input['set_char']);
-
+        $updateChar = $input['set_char'];
         $setNumber = NumberSpecificationModel::find($id);
+        $description = "$user->name is updated set number $setNumber->set_number value's $setNumber->set_char to {$input['set_char']}.";
 
         if($setNumber) {
             $setNumber->set_char = $input['set_char'];
-
-            try {
-                $update = $setNumber->push();
-                $response = ApiResponse::Success($setNumber, 'number specification is updated');
-                return response()->json($response['json'], $response['status']);
     
-            } catch(QueryException $e) {
-                $response = ApiResponse::Unknown('something was wrong');
-                return response()->json($response['json'], $response['status']);
-            }
-        }
-
-        $response = ApiResponse::NotFound('number specification not found');
-        return response()->json($response['json'], $response['status']);
-    }
-
-    public function active(Request $request) {
-        $id = $request->id;
-
-        $setNumber = NumberSpecificationModel::find($id);
-
-        if($setNumber) {
-            $setNumber->active = !$setNumber->active;
-
+            $history = [
+                "user_id" => $user->id,
+                "type" => 'number',
+                "action" => "UPDATE",
+                "description" => $description
+            ];
+     
             try {
                 $update = $setNumber->push();
-                $status = $setNumber->active === true ? 'enable' : 'disable';
-                $response = ApiResponse::Success($setNumber, "number specification is $status");
+                $saveRecord = HistoryLogModel::create($history);
+
+                $response = ApiResponse::Success($setNumber, 'number specification is updated');
                 return response()->json($response['json'], $response['status']);
     
             } catch(QueryException $e) {

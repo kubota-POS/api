@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateNumberSpecificationTable extends Migration
+class CreateCategoryTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,10 @@ class CreateNumberSpecificationTable extends Migration
      */
     public function up()
     {
-        Schema::create('number_specification', function (Blueprint $table) {
+        Schema::create('category', function (Blueprint $table) {
             $table->id();
-            $table->integer('set_number')->unique();
-            $table->string('set_char')->nullable()->unique();
+            $table->string('name')->unique();
+            $table->text('description')->nullable();
             $table->timestamps();
         });
     }
@@ -28,6 +28,6 @@ class CreateNumberSpecificationTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('number_specification');
+        Schema::dropIfExists('category');
     }
 }

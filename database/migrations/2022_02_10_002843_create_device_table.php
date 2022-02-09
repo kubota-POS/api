@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateNumberSpecificationTable extends Migration
+class CreateDeviceTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,13 @@ class CreateNumberSpecificationTable extends Migration
      */
     public function up()
     {
-        Schema::create('number_specification', function (Blueprint $table) {
+        Schema::create('device', function (Blueprint $table) {
             $table->id();
-            $table->integer('set_number')->unique();
-            $table->string('set_char')->nullable()->unique();
+            $table->string('name');
+            $table->char('ip', 16)->unique();
+            $table->char('mac', 30)->unique();
+            $table->text('note')->nullable();
+            $table->boolean('active')->default(false);
             $table->timestamps();
         });
     }
@@ -28,6 +31,6 @@ class CreateNumberSpecificationTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('number_specification');
+        Schema::dropIfExists('device');
     }
 }

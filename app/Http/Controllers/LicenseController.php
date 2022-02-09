@@ -5,17 +5,20 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use Validator;
+use \Carbon\Carbon;
 use App\Models\LicenseModel;
 use App\Validations\LicenseValidator;
 use App\HttpResponse\ApiResponse;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Database\QueryException;
 
 class LicenseController extends Controller
 {
     public function __construct() {
         $this->middleware('license', [
-            'except' => ['checkLicense', 'activate', 'saveToken']
+            'except' => ['checkLicense', 'activate', 'saveToken'],
         ]);
+        $this->middleware('jwt.verify', ['except' => ['checkLicense', 'activate', 'saveToken']]);
     }
 
     /**
@@ -96,6 +99,37 @@ class LicenseController extends Controller
         } catch(QueryException $e) {
             $response = ApiResponse::Unknown('someting was wrong');
             return response()->json($response['json'], $response['status']);
+        }
+    }
+
+    public function device(Request $request) {
+        $license = $request->header('license');
+
+        try {
+            $decryptLicense = Crypt::decryptString($license);
+            $licenseObject = json_decode($decryptLicense);
+
+            $plan = $licenseObject->plan;
+
+            if($plan->active === false) {
+                throw new Exception('License Not Active');
+                return;
+            }
+
+            $current = Carbon::now()->timestamp;
+            $expired = Carbon::create($plan->expired_at)->timestamp;
+
+            if($expired < $current) {
+                throw new Exception('Licnese Expired');
+                return;
+            }
+
+
+            $response = ApiResponse::Success($licenseObject,'get license info');
+            return response()->json($response['json'], $response['status']);
+
+        } catch(Exception $e) {
+            throw new Exception('Invalid License');
         }
     }
 }
