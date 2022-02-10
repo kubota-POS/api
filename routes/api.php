@@ -39,6 +39,9 @@ Route::group([
     Route::group([
         'prefix' => 'device'
     ], function ($router) {
+        Route::get('/', [DeviceController::class, 'index']);
+        Route::post('/', [DeviceController::class, 'create']);
+        Route::put('/{id}', [DeviceController::class, 'update']);
         Route::get('/first', [DeviceController::class, 'first']);
         Route::post('/first', [DeviceController::class, 'firstDeviceCreate']);
     });

@@ -23,6 +23,7 @@ class AuthController extends Controller
     public function __construct() {
         $this->middleware('jwt.verify', ['except' => ['login', 'register', 'check']]);
         $this->middleware('license');
+        $this->middleware('device');
     }
 
     /**
