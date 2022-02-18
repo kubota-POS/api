@@ -11,6 +11,7 @@ use App\Http\Controllers\ShopController;
 use App\Http\Controllers\NumberSpecificationController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\HistoryLogController;
+use App\Http\Controllers\ItemController;
 
 /*
 |--------------------------------------------------------------------------
@@ -92,6 +93,17 @@ Route::group([
         Route::get('/{type}', [HistoryLogController::class, 'index']);
         Route::post('', [HistoryLogController::class, 'create']);
     });
+
+    Route::group([
+        'prefix' => 'items'
+    ], function ($router) {
+        Route::get('', [ItemController::class, 'index']);
+        Route::post('', [ItemController::class, 'create']);
+        Route::put('/{id}', [ItemController::class, 'update']);
+        Route::get('/{id}', [ItemController::class, 'detail']);
+        Route::delete('/{id}', [ItemController::class, 'delete']);
+    });
+
 });
 
 Route::any('{any}', function() {
