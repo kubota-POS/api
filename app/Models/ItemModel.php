@@ -25,6 +25,6 @@ class ItemModel extends Model
     ];
 
     public function category() {
-        return $this->belongsTo(categoryModel::class);
+        return $this->belongsTo(CategoryModel::class);
     }
 }

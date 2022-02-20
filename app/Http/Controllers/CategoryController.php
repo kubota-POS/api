@@ -16,10 +16,11 @@ class CategoryController extends Controller
 
     public function index () {
         try {
-            $categories = CategoryModel::with('items')->get();
+            $categories = CategoryModel::with(['items'])->get();
             $response = ApiResponse::Success($categories, 'get categories list');
             return response()->json($response['json'], $response['status']);
         } catch (QueryException $e) {
+            dd($e);
             $response = ApiResponse::Unknown('someting was wrong');
             return response()->json($response['json'], $response['status']);
         }

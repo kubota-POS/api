@@ -19,4 +19,8 @@ class CategoryModel extends Model
     protected $hidden = [
         'created_at', 'updated_at'
     ];
+
+    public function items () {
+        return $this->hasMany(ItemModel::class, 'category_id');
+    }
 }
