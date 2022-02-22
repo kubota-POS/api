@@ -1,0 +1,1 @@
+php artisan migrate --path=/database/migrations/2022_01_27_153907_create_license_table.php
