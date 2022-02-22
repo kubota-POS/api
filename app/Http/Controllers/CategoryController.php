@@ -11,7 +11,7 @@ use Illuminate\Database\QueryException;
 class CategoryController extends Controller
 {
     public function __construct() {
-        $this->middleware(['license', 'jwt.verify']);
+        $this->middleware(['license', 'jwt.verify', 'device']);
     }
 
     public function index () {

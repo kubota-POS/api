@@ -13,7 +13,7 @@ class ItemController extends Controller
 {
 
     public function __construct() {
-        $this->middleware(['license', 'jwt.verify']);
+        $this->middleware(['license', 'jwt.verify', 'device']);
     }
 
     public function index () {
@@ -73,7 +73,7 @@ class ItemController extends Controller
 
     public function update (Request $request) {
         $id = $request->id;
-        $input = $request->only(['category_id', 'code', 'eng_name', 'mm_name', 'model', 'qty', 'price', 'location', 'active']);
+        $input = $request->only(['category_id', 'code', 'eng_name', 'mm_name', 'model', 'qty', 'price', 'percentage', 'fix_amount', 'location', 'active']);
 
         try {
             $item = ItemModel::with(['category'])->find($id);
