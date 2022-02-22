@@ -22,17 +22,18 @@ class ItemController extends Controller
             $response = ApiResponse::Success($items, 'get all items');
             return response()->json($response['json'], $response['status']);
         } catch (QueryException $e) {
-            dd($e);
             $response = ApiResponse::Unknown('someting was wrong');
             return response()->json($response['json'], $response['status']);
         }
     }
 
     public function create (Request $request) {
-        $input = $request->only(['category_id', 'eng_name', 'mm_name', 'model', 'qty', 'price', 'location', 'active']);
+        $input = $request->only(['category_id', 'code', 'eng_name', 'mm_name', 'model', 'qty', 'price', 'location', 'active']);
 
         $validator = Validator::make($input, [
-            "eng_name" => 'required',
+            "eng_name" => "required",
+            "code" => "required|unique:items",
+            "model" => "required|unique:items"
         ]);
 
         if ($validator->fails()) {
@@ -72,7 +73,7 @@ class ItemController extends Controller
 
     public function update (Request $request) {
         $id = $request->id;
-        $input = $request->only(['category_id', 'eng_name', 'mm_name', 'model', 'qty', 'price', 'location', 'active']);
+        $input = $request->only(['category_id', 'code', 'eng_name', 'mm_name', 'model', 'qty', 'price', 'location', 'active']);
 
         try {
             $item = ItemModel::with(['category'])->find($id);

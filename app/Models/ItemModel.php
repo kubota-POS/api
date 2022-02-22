@@ -13,7 +13,7 @@ class ItemModel extends Model
     protected $table = 'items';
 
     protected $fillable = [
-        'category_id', 'eng_name', 'mm_name', 'model', 'qty', 'price', 'location', 'active'
+        'code', 'category_id', 'eng_name', 'mm_name', 'model', 'qty', 'price', 'location', 'active'
     ];
 
     protected $hidden = [
