@@ -12,7 +12,7 @@ class LicenseValidator {
     /**
     *   License key checking
     */
-    public function check($license) {
+    public static function check($license) {
 
         if(count($license) === 0) {
            return ApiResponse::Success([],'license does not exist');
@@ -44,7 +44,7 @@ class LicenseValidator {
     /**
     *   Validation for license activation and generate token
     */
-    public function activate($input) {
+    public static function activate($input) {
         $user = $input['user'];
         $plan = $input['plan'];
 
@@ -77,7 +77,7 @@ class LicenseValidator {
     /**
     *   Validation for license info [serial and token] save
     */
-    public function store($input) {
+    public static function store($input) {
         try {
             $decrypted = Crypt::decryptString($input['key']);
             $decode_json = json_decode($decrypted);

@@ -3,7 +3,7 @@ namespace App\HttpResponse;
 
 class ApiResponse {
 
-    public function Success($data, $message) {
+    public static function Success($data, $message) {
         return [
             "json" => [
                 'success' => true,
@@ -14,7 +14,7 @@ class ApiResponse {
         ];
     }
 
-    public function Created($data, $message) {
+    public static function Created($data, $message) {
         return [
             "json" => [
                 'success' => false,
@@ -25,7 +25,7 @@ class ApiResponse {
         ];
     }
 
-    public function NotFound($message) {
+    public static function NotFound($message) {
         return [
             "json" => [
                 'success' => false,
@@ -35,7 +35,7 @@ class ApiResponse {
         ];
     }
 
-    public function BedRequest($message) {
+    public static function BedRequest($message) {
         return [
             "json" => [
                 'success' => false,
@@ -45,7 +45,7 @@ class ApiResponse {
         ];
     }
 
-    public function UnProcess($message) {
+    public static function UnProcess($message) {
         return [
             "json" => [
                 'success' => false,
@@ -55,7 +55,7 @@ class ApiResponse {
         ];
     }
 
-    public function Unknown($message) {
+    public static function Unknown($message) {
         return [
             "json" => [
                 'success' => false,
@@ -65,7 +65,7 @@ class ApiResponse {
         ];
     }
 
-    public function Unauthorized($message) {
+    public static function Unauthorized($message) {
         return [
             "json" => [
                 'success' => false,
