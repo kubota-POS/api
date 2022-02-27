@@ -96,7 +96,6 @@ class ItemController extends Controller
         $id = $request->id;
 
         try {
-
             $item = ItemModel::find($id);
 
             if(!$item) {
@@ -112,5 +111,30 @@ class ItemController extends Controller
             $response = ApiResponse::Unknown('someting was wrong');
             return response()->json($response['json'], $response['status']);
         }
+    }
+
+    public function deleteMultiple(Request $request) {
+        $input = $request->only(['data']);
+
+        $validator = Validator::make($input, [
+            "data" => "required"
+        ]);
+
+        if ($validator->fails()) {
+            $response = ApiResponse::BedRequest($validator->errors()->first());
+            return response()->json($response['json'], $response['status']);
+        }
+
+        try {
+            $ids = $input['data'];
+            $item = ItemModel::whereIn('id', $ids)->delete();
+            $response = ApiResponse::Success(null, 'items are deleted');
+            return response()->json($response['json'], $response['status']);
+
+        } catch(QueryException $e) {
+            $response = ApiResponse::Unknown('someting was wrong');
+            return response()->json($response['json'], $response['status']);
+        }
+
     }
 }

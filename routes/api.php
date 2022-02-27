@@ -102,6 +102,7 @@ Route::group([
         Route::put('/{id}', [ItemController::class, 'update']);
         Route::get('/{id}', [ItemController::class, 'detail']);
         Route::delete('/{id}', [ItemController::class, 'delete']);
+        Route::post('/delete', [ItemController::class, 'deleteMultiple']);
     });
 
 });
