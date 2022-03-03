@@ -100,26 +100,30 @@ class CategoryController extends Controller
         }
     }
 
-    public function multiDelete(Request $request){
-        
-        try {
-            $category = CategoryModel::find($request->ids);
+    public function deleteMultiple(Request $request) {
+        $ids=$request->data;
+        $input = $request->only(['data']);
+        $deleteditem = CategoryModel::find($ids);
+        $validator = Validator::make($input, [
+            "data" => "required"
+        ]);
 
-            if(!$category) {
-                $response = ApiResponse::NotFound('category is not found');
-                return response()->json($response['json'], $response['status']);
-            }
-
-            foreach($request->ids as $ids){
-                $deleted = CategoryModel::where('id', $ids)->delete();
-            }
-            $response = ApiResponse::Success($category, 'Selected category is deleted');
+        if ($validator->fails()) {
+            $response = ApiResponse::BedRequest($validator->errors()->first());
             return response()->json($response['json'], $response['status']);
-               
-        } catch (QueryException $e) {
+        }
+
+        try {
+            $ids = $input['data'];
+            $item = CategoryModel::whereIn('id', $ids)->delete();
+            $response = ApiResponse::Success($deleteditem, 'items are deleted');
+            return response()->json($response['json'], $response['status']);
+
+        } catch(QueryException $e) {
             $response = ApiResponse::Unknown('someting was wrong');
             return response()->json($response['json'], $response['status']);
         }
+
     }
 
     public function category (Request $request) {
