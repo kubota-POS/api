@@ -85,6 +85,7 @@ Route::group([
         Route::post('', [CategoryController::class, 'create']);
         Route::put('/{id}', [CategoryController::class, 'update']);
         Route::delete('/{id}', [CategoryController::class, 'delete']);
+        Route::delete('', [CategoryController::class, 'multiDelete']);
     });
 
     Route::group([
