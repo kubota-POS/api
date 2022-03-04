@@ -12,6 +12,7 @@ use App\Http\Controllers\NumberSpecificationController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\HistoryLogController;
 use App\Http\Controllers\ItemController;
+use App\Http\Controllers\CustomerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -104,6 +105,17 @@ Route::group([
         Route::get('/{id}', [ItemController::class, 'detail']);
         Route::delete('/{id}', [ItemController::class, 'delete']);
         Route::delete('', [ItemController::class, 'deleteMultiple']);
+    });
+
+    Route::group([
+        'prefix' => 'customer'
+    ], function ($router) {
+        Route::get('', [CustomerController::class, 'index']);
+        Route::post('', [CustomerController::class, 'create']);
+        Route::put('/{id}', [CustomerController::class, 'update']);
+        Route::get('/{id}', [CustomerController::class, 'detail']);
+        Route::delete('/{id}', [CustomerController::class, 'delete']);
+        Route::delete('', [CustomerController::class, 'deleteMultiple']);
     });
 
 });

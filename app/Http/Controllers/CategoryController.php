@@ -20,7 +20,6 @@ class CategoryController extends Controller
             $response = ApiResponse::Success($categories, 'get categories list');
             return response()->json($response['json'], $response['status']);
         } catch (QueryException $e) {
-            dd($e);
             $response = ApiResponse::Unknown('someting was wrong');
             return response()->json($response['json'], $response['status']);
         }
