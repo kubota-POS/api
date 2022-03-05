@@ -60,6 +60,7 @@ Route::group([
         Route::get('', [AuthController::class, 'index']);
         Route::delete('/{id}',[AuthController::class, 'delete']);
         Route::put('/{id}',[AuthController::class, 'update']);
+        Route::put('/psw/{id}',[AuthController::class, 'passwordUpdate']);
     });
 
     Route::group([
