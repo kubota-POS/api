@@ -43,7 +43,7 @@ class DeviceController extends Controller
             }
 
         } catch(QueryException $e) {
-            $response = ApiResponse::Unknown('someting was wrong');
+            $response = ApiResponse::Unknown('something was wrong');
             return response()->json($response['json'], $response['status']);
         }
     }
