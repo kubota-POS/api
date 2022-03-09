@@ -1,18 +1,19 @@
 <?php
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-
 use App\HttpResponse\ApiResponse;
+
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\LicenseController;
-use App\Http\Controllers\DeviceController;
-use App\Http\Controllers\ShopController;
-use App\Http\Controllers\NumberSpecificationController;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\HistoryLogController;
 use App\Http\Controllers\ItemController;
+use App\Http\Controllers\ShopController;
+use App\Http\Controllers\DeviceController;
+use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\LicenseController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\HistoryLogController;
+use App\Http\Controllers\NumberSpecificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -101,6 +102,7 @@ Route::group([
         'prefix' => 'items'
     ], function ($router) {
         Route::get('', [ItemController::class, 'index']);
+        Route::get('/import', [ItemController::class, 'import']);
         Route::post('', [ItemController::class, 'create']);
         Route::put('/{id}', [ItemController::class, 'update']);
         Route::get('/{id}', [ItemController::class, 'detail']);
@@ -117,6 +119,16 @@ Route::group([
         Route::get('/{id}', [CustomerController::class, 'detail']);
         Route::delete('/{id}', [CustomerController::class, 'delete']);
         Route::delete('', [CustomerController::class, 'deleteMultiple']);
+    });
+
+    Route::group([
+        'prefix' => 'invoice'
+    ], function ($router) {
+        Route::get('', [InvoiceController::class, 'index']);
+        Route::post('', [InvoiceController::class, 'create']);
+        Route::delete('/{id}', [InvoiceController::class, 'delete']);
+        Route::get('restore', [InvoiceController::class, 'restore']);
+        Route::get('deleted', [InvoiceController::class, 'deletedList']);
     });
 
 });

@@ -154,37 +154,38 @@ class AuthController extends Controller
 
     public function update(Request $request) 
     {
-        $input = $request->only(['name','email', 'phone', 'active']);
-
-        try {
-            $user = User::find($request->id);
-
-            if(!$user){
-                $response = ApiResponse::NotFound('User is not found');
-                return response()->json($response['json'], $response['status']);
-            }
-
-           
-            $validator = Validator::make($input, [
-                'name' => 'unique:users',
-                'email' => 'unique:users',
-                'phone' => 'unique:users'
-            ]);
+        $input = $request->only(['name', 'phone', 'email', 'active']);
+            try {
+                $user = User::find($request->id);
     
-            if($validator->fails()){
-                $response = ApiResponse::BedRequest($validator->errors()->first());
-                return response()->json($response['json'], $response['status']);
-            }
+                if(!$user){
+                    $response = ApiResponse::NotFound('User is not found');
+                    return response()->json($response['json'], $response['status']);
+                }
 
-            $update = User::where('id', '=', $request->id)->update($input);
-            $user->refresh();
-            $response = ApiResponse::Success($user, 'user is updated');
-            return response()->json($response['json'], $response['status']); 
-
-        } catch(QueryException $e) {
-            $response = ApiResponse::Unknown('unknown error');
-            return response()->json($response['json'], $response['status']); 
-        }
+                
+               
+                $validator = Validator::make($input, [
+                     'name' => 'unique:users',
+                     'email' => 'unique:users',
+                     'phone' => 'unique:users'
+                 ]);
+        
+                if($validator->fails()){
+                    $response = ApiResponse::BedRequest($validator->errors()->first());
+                    return response()->json($response['json'], $response['status']);
+                }
+    
+                $update = User::where('id', '=', $request->id)->update($input);
+                $user->refresh();
+                $response = ApiResponse::Success($user, 'user is updated');
+                return response()->json($response['json'], $response['status']); 
+    
+            } catch(QueryException $e) {
+                $response = ApiResponse::Unknown('unknown error');
+                return response()->json($response['json'], $response['status']); 
+            } 
+        
     }
 
     public function passwordUpdate(Request $request)

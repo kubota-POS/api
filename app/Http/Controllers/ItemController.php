@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\ItemImport;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 use Validator;
 use App\Models\ItemModel;
 use App\Models\CategoryModel;
@@ -111,6 +113,16 @@ class ItemController extends Controller
             $response = ApiResponse::Unknown('someting was wrong');
             return response()->json($response['json'], $response['status']);
         }
+    }
+
+    public function import() 
+    {
+        $path = storage_path('app/demo.xlsx');
+        Excel::import(new ItemImport, $path);
+        
+        $item = ItemModel::all();
+
+        return $item;
     }
 
     public function deleteMultiple(Request $request) {
