@@ -99,6 +99,32 @@ class CategoryController extends Controller
         }
     }
 
+    public function deleteMultiple(Request $request) {
+        $ids=$request->data;
+        $input = $request->only(['data']);
+        $deleteditem = CategoryModel::find($ids);
+        $validator = Validator::make($input, [
+            "data" => "required"
+        ]);
+
+        if ($validator->fails()) {
+            $response = ApiResponse::BedRequest($validator->errors()->first());
+            return response()->json($response['json'], $response['status']);
+        }
+
+        try {
+            $ids = $input['data'];
+            $item = CategoryModel::whereIn('id', $ids)->delete();
+            $response = ApiResponse::Success($deleteditem, 'items are deleted');
+            return response()->json($response['json'], $response['status']);
+
+        } catch(QueryException $e) {
+            $response = ApiResponse::Unknown('someting was wrong');
+            return response()->json($response['json'], $response['status']);
+        }
+
+    }
+
     public function category (Request $request) {
         $id = $request->id;
 

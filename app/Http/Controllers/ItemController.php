@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\ItemImport;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 use Validator;
 use App\Models\ItemModel;
 use App\Models\CategoryModel;
@@ -113,9 +115,20 @@ class ItemController extends Controller
         }
     }
 
-    public function deleteMultiple(Request $request) {
-        $input = $request->only(['data']);
+    public function import() 
+    {
+        $path = storage_path('app/demo.xlsx');
+        Excel::import(new ItemImport, $path);
+        
+        $item = ItemModel::all();
 
+        return $item;
+    }
+
+    public function deleteMultiple(Request $request) {
+        $ids=$request->data;
+        $input = $request->only(['data']);
+        $deleteditem = ItemModel::find($ids);
         $validator = Validator::make($input, [
             "data" => "required"
         ]);
@@ -128,7 +141,7 @@ class ItemController extends Controller
         try {
             $ids = $input['data'];
             $item = ItemModel::whereIn('id', $ids)->delete();
-            $response = ApiResponse::Success(null, 'items are deleted');
+            $response = ApiResponse::Success($deleteditem, 'items are deleted');
             return response()->json($response['json'], $response['status']);
 
         } catch(QueryException $e) {
