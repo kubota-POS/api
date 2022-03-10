@@ -120,4 +120,58 @@ class InvoiceController extends Controller
             return response()->json($response['json'], $response['status']);
         }
     }
+//Permanently Delete
+    public function permanentDelete(Request $request)
+    {
+        try {
+            $invoice = InvoiceModel::find($request->id);
+
+            if(!$invoice) {
+                $response = ApiResponse::NotFound('invoice is not found');
+            } else {
+                $invoice->forceDelete();
+                $response = ApiResponse::Success($invoice, 'invoice is deleted');
+            }
+
+            return response()->json($response['json'], $response['status']);
+
+        } catch(QueryException $e) {
+            $response = ApiResponse::Unknown('someting was wrong');
+            return response()->json($response['json'], $response['status']);
+        }
+    }
+//List by Date filter
+    public function listByDate(Request $request)
+    {
+        $input = $request->only(['start_date','end_date']);
+        $validator = Validator::make($input, [
+            "start_date" => 'required',
+            "end_date" => 'required',
+        ]);
+
+        if($validator->fails()){
+            $response = ApiResponse::BedRequest($validator->errors()->first());
+            return response()->json($response['json'], $response['status']);
+        }
+        try {
+            $start=$request->start_date;
+            $end=$request->end_date;
+            $get = InvoiceModel::whereBetween('created_at', [$start, $end])->get()->all();
+            $response = ApiResponse::Success($get, 'get invoice list');
+            return response()->json($response['json'], $response['status']);   
+        } catch (QueryException $e) {
+            $response = ApiResponse::Unknown('someting was wrong');
+            return response()->json($response['json'], $response['status']);
+        }
+    }
+//test for store fakeDate
+    public function test(Request $request)
+    {
+        $input = $request->only(['created_at','invoice_id', 'customer_id', 'invoice_data', 'total_amount','discount','cash_back']);
+
+            $invoice = InvoiceModel::create($input);
+         
+            $response = ApiResponse::Success($invoice, 'get invoice list');
+            return response()->json($response['json'], $response['status']);
+    }
 }

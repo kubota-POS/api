@@ -19,6 +19,7 @@ class InvoiceModel extends Model
        'invoice_data',
        'total_amount',
        'discount',
-       'cash_back'
+       'cash_back',
+       'created_at'
     ];
 }

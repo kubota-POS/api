@@ -15,7 +15,7 @@ class CreateInvoiceTable extends Migration
     {
         Schema::create('invoice', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('invoice_id')->unsigned()->nullable()->default(null);
+            $table->bigInteger('invoice_id')->unique()->unsigned()->nullable()->default(null);
             $table->foreignId('customer_id')->nullable();
             $table->longtext('invoice_data');
             $table->float('total_amount');
