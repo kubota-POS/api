@@ -14,7 +14,7 @@ class DeviceController extends Controller
     public function __construct() {
         $this->middleware('license', ['except' => ['first', 'firstDeviceCreate']]);
         $this->middleware('jwt.verify', ['except' => ['first', 'firstDeviceCreate']]);
-        $this->middleware('device', ['except' => ['frist', 'firstDeviceCreate']]);
+        $this->middleware('device', ['except' => ['first', 'firstDeviceCreate']]);
     }
 
     public function index() {

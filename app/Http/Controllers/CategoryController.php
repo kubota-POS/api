@@ -20,7 +20,6 @@ class CategoryController extends Controller
             $response = ApiResponse::Success($categories, 'get categories list');
             return response()->json($response['json'], $response['status']);
         } catch (QueryException $e) {
-            dd($e);
             $response = ApiResponse::Unknown('someting was wrong');
             return response()->json($response['json'], $response['status']);
         }
@@ -104,7 +103,7 @@ class CategoryController extends Controller
         $id = $request->id;
 
         try {
-            $category = CategoryModel::find($id);
+            $category = CategoryModel::with(['items'])->find($id);
 
             if(!$category) {
                 $response = ApiResponse::NotFound('category is not found');

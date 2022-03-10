@@ -19,5 +19,23 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
+        \App\Models\CategoryModel::factory()->create([
+            "name" => "kubota"
+        ]);
+
+        for($x=1; $x<1000; $x++) {
+            \App\Models\ItemModel::factory()->create([
+                "category_id" => 1,
+                "code" => "CODE_" . $x,
+                "eng_name" => "ENG_NAME_" . $x,
+                "mm_name" => "MM_NAME_" . $x,
+                "model" => "MODEL_" . $x,
+                "qty" => 2000,
+                "price" => 100 * $x,
+                "percentage" => 20,
+                "fix_amount" => 10 * $x
+            ]); 
+        }
+
     }
 }
