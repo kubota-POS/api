@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Validator;
 use App\Models\ItemModel;
+use App\Exports\ItemExport;
 use App\Imports\ItemImport;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -124,6 +125,11 @@ class ItemController extends Controller
         
         $item = ItemModel::all();
         return "Sucessfully Imported";
+    }
+
+    public function export() 
+    {
+       return Excel::download(new ItemExport, 'Items.xlsx');
     }
 
     public function deleteMultiple(Request $request) {

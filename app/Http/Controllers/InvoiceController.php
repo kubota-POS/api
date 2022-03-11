@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\InvoiceModel;
 use Validator;
+use App\Models\InvoiceModel;
 use Illuminate\Http\Request;
+use App\Exports\InvoiceExport;
 use App\HttpResponse\ApiResponse;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Database\QueryException;
 
 class InvoiceController extends Controller
@@ -173,5 +175,10 @@ class InvoiceController extends Controller
          
             $response = ApiResponse::Success($invoice, 'get invoice list');
             return response()->json($response['json'], $response['status']);
+    }
+//ExcelExport
+    public function export() 
+    {
+       return Excel::download(new InvoiceExport, 'Invoices.xlsx');
     }
 }
