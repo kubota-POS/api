@@ -105,9 +105,10 @@ Route::group([
         Route::get('/import', [ItemController::class, 'import']);
         Route::post('', [ItemController::class, 'create']);
         Route::put('/{id}', [ItemController::class, 'update']);
+        Route::post('/percentage', [ItemController::class, 'updatePercentage']);
         Route::get('/{id}', [ItemController::class, 'detail']);
         Route::delete('/{id}', [ItemController::class, 'delete']);
-        Route::delete('', [ItemController::class, 'deleteMultiple']);
+        Route::post('/delete', [ItemController::class, 'deleteMultiple']);
     });
 
     Route::group([

@@ -16,7 +16,7 @@ class CategoryController extends Controller
 
     public function index () {
         try {
-            $categories = CategoryModel::with(['items'])->get();
+            $categories = CategoryModel::get();
             $response = ApiResponse::Success($categories, 'get categories list');
             return response()->json($response['json'], $response['status']);
         } catch (QueryException $e) {

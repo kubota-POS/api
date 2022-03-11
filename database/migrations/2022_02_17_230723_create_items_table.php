@@ -23,7 +23,6 @@ class CreateItemsTable extends Migration
             $table->integer('qty')->default(0);
             $table->string('price')->nullable()->default(null);
             $table->string('percentage')->nullable()->default(0);
-            $table->string('fix_amount')->nullable()->default(0);
             $table->string('location')->nullable()->default(null);
             $table->boolean('active')->default(true);
             $table->timestamps();

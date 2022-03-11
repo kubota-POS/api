@@ -67,6 +67,11 @@ class LicenseController extends Controller
         $encode_json = json_encode($input);
         $scretKey = substr(strtoupper(hash('sha256', $encode_json)), 0, 32);
 
+        // dd([
+        //     'app_key' => env('APP_KEY'),
+        //     'scret_key' => $scretKey
+        // ]);
+
         if(env('APP_KEY') !== $scretKey) {
             $response = ApiResponse::BedRequest('Invalid license key');
             return response()->json($response['json'], $response['status']);
@@ -121,18 +126,16 @@ class LicenseController extends Controller
         $license = $request->header('license');
 
         try {
-            $decryptLicense = Crypt::decryptString($license);
+            $decryptLicense = Crypt::decrypt($license);
             $licenseObject = json_decode($decryptLicense);
 
-            $plan = $licenseObject->plan;
-
-            if($plan->active === false) {
+            if($licenseObject->active === false) {
                 throw new Exception('License Not Active');
                 return;
             }
 
             $current = Carbon::now()->timestamp;
-            $expired = Carbon::create($plan->expired_at)->timestamp;
+            $expired = Carbon::create($licenseObject->expired_date)->timestamp;
 
             if($expired < $current) {
                 throw new Exception('Licnese Expired');

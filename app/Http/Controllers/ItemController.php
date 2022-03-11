@@ -30,7 +30,7 @@ class ItemController extends Controller
     }
 
     public function create (Request $request) {
-        $input = $request->only(['category_id', 'code', 'eng_name', 'mm_name', 'model', 'qty', 'price', 'location', 'active']);
+        $input = $request->only(['category_id', 'code', 'eng_name', 'mm_name', 'model', 'qty', 'price', 'percentage', 'location', 'active']);
 
         $validator = Validator::make($input, [
             "eng_name" => "required",
@@ -94,6 +94,39 @@ class ItemController extends Controller
         }
     }
 
+    public function updatePercentage(Request $request) {
+        $input = $request->only(['amount', 'type']);
+
+        $validator = Validator::make($input, [
+            "amount" => "required",
+            "type" => "required"
+        ]);
+
+        if ($validator->fails()) {
+            $response = ApiResponse::BedRequest($validator->errors()->first());
+            return response()->json($response['json'], $response['status']);
+        }
+
+        try {
+            $newItem = new ItemModel;
+            if($input['type'] ==='increment') {
+                $newItem->increment('percentage', $request->amount);
+            }
+
+            if($input['type'] === 'decrement') {
+                $newItem->decrement('percentage', $request->amount);
+            }
+
+            $newItem->update();
+
+            $response = ApiResponse::Success($newItem, "item's percentage are updated");
+            return response()->json($response['json'], $response['status']);
+        } catch (QueryException $e) {
+            $response = ApiResponse::Unknown('someting was wrong');
+            return response()->json($response['json'], $response['status']);
+        }
+    }
+
     public function delete(Request $request) {
         $id = $request->id;
 
@@ -128,7 +161,7 @@ class ItemController extends Controller
     public function deleteMultiple(Request $request) {
         $ids=$request->data;
         $input = $request->only(['data']);
-        $deleteditem = ItemModel::find($ids);
+        
         $validator = Validator::make($input, [
             "data" => "required"
         ]);
@@ -139,8 +172,10 @@ class ItemController extends Controller
         }
 
         try {
+            $deleteditem = ItemModel::find($ids);
             $ids = $input['data'];
             $item = ItemModel::whereIn('id', $ids)->delete();
+        
             $response = ApiResponse::Success($deleteditem, 'items are deleted');
             return response()->json($response['json'], $response['status']);
 
@@ -148,6 +183,5 @@ class ItemController extends Controller
             $response = ApiResponse::Unknown('someting was wrong');
             return response()->json($response['json'], $response['status']);
         }
-
     }
 }

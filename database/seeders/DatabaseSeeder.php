@@ -30,10 +30,9 @@ class DatabaseSeeder extends Seeder
                 "eng_name" => "ENG_NAME_" . $x,
                 "mm_name" => "MM_NAME_" . $x,
                 "model" => "MODEL_" . $x,
-                "qty" => 2000,
+                "qty" => 10 * $x,
                 "price" => 100 * $x,
                 "percentage" => 20,
-                "fix_amount" => 10 * $x
             ]); 
         }
 
