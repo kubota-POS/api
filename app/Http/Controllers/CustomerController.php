@@ -32,7 +32,7 @@ class CustomerController extends Controller
 
         $validator = Validator::make($input, [
             "name" => 'required',
-            "phone" => 'required|unique:customers'
+            "phone" => 'required'
         ]);
 
         if($validator->fails()){

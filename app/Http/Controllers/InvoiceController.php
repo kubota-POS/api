@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\InvoiceModel;
 use Validator;
+use App\Models\InvoiceModel;
 use Illuminate\Http\Request;
+use App\Exports\InvoiceExport;
 use App\HttpResponse\ApiResponse;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Database\QueryException;
 
 class InvoiceController extends Controller
@@ -34,11 +36,10 @@ class InvoiceController extends Controller
 
     public function create(Request $request)
     {
-        $input = $request->only(['invoice_id', 'customer_id', 'invoice_data', 'total_amount','discount','cash_back']);
+        $input = $request->only(['invoice_id', 'customer_name', 'customer_phone', 'customer_email', 'customer_address', 'invoice_data', 'total_amount','discount','cash_back']);
 
         $validator = Validator::make($input, [
             "invoice_id" => 'required|unique:invoice',
-            "customer_id" => 'required',
             "invoice_data" => 'required',
             "total_amount" => 'required',
             "discount" => 'required',
@@ -49,6 +50,8 @@ class InvoiceController extends Controller
             $response = ApiResponse::BedRequest($validator->errors()->first());
             return response()->json($response['json'], $response['status']);
         }
+
+        $input['invoice_data'] = json_encode($input['invoice_data']);
 
         try{
             $invoice = InvoiceModel::create($input);
@@ -173,5 +176,10 @@ class InvoiceController extends Controller
          
             $response = ApiResponse::Success($invoice, 'get invoice list');
             return response()->json($response['json'], $response['status']);
+    }
+//ExcelExport
+    public function export() 
+    {
+       return Excel::download(new InvoiceExport, 'Invoices.xlsx');
     }
 }

@@ -2,34 +2,35 @@
 
 namespace App\Imports;
 
+use Throwable;
 use App\Models\ItemModel;
 use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Concerns\ToModel;
+use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Concerns\Importable;
+use Maatwebsite\Excel\Concerns\SkipsErrors;
+use Maatwebsite\Excel\Concerns\SkipsOnError;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Illuminate\Support\Facades\Validator;
-use Maatwebsite\Excel\Concerns\ToModel;
 
-class ItemImport implements ToCollection, WithHeadingRow
+class ItemImport implements ToModel, WithHeadingRow, SkipsOnError
 {
+    use Importable, SkipsErrors;
     /**
     * @param array $row
     *
     * @return \Illuminate\Database\Eloquent\Model|null
     */
-    public function collection(Collection $rows)
+    public function model(array $row)
     {
-         Validator::make($rows->toArray(), [
-             'code' => 'required',
-             'eng_name' => 'required',
-             'model' => 'required',
-         ])->validate();
-  
-        foreach ($rows as $row) {
-            User::create([
-                'code' => $row[0],
-                'eng_name' => $row[1],
-                'model' => $row[3],
-            ]);
-        }
+        return new ItemModel([
+           'code'     => $row['code'],
+           'eng_name'    => $row['name_en'], 
+           'model' => $row['model'],
+        ]);
+    }
+    public function onError(Throwable $e)
+    {
+        // Handle the failures how you'd like.
     }
 }
