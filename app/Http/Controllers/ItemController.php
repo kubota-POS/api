@@ -119,13 +119,11 @@ class ItemController extends Controller
 
     public function import() 
     {
-        $path = storage_path('app/dd.xlsx');
-        $data = Excel::load($path)->get();
-        //Excel::import(new ItemImport, $path);
+        $path = storage_path('app/list.xlsx');
+        Excel::import(new ItemImport, $path);
         
         $item = ItemModel::all();
-
-        return $data;
+        return "Sucessfully Imported";
     }
 
     public function deleteMultiple(Request $request) {

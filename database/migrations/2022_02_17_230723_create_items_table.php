@@ -16,10 +16,10 @@ class CreateItemsTable extends Migration
         Schema::create('items', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('category_id')->unsigned()->nullable()->default(null);
-            $table->string('code');
+            $table->string('code')->unique();
             $table->string('eng_name')->nullable()->default(null);
             $table->string('mm_name')->nullable()->default(null);
-            $table->string('model');
+            $table->string('model')->unique();
             $table->integer('qty')->default(0);
             $table->string('price')->nullable()->default(null);
             $table->string('percentage')->nullable()->default(0);
