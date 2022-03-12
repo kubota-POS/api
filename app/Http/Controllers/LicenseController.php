@@ -18,7 +18,7 @@ class LicenseController extends Controller
     public function __construct() {
         $this->middleware('license', ['except' => ['checkLicense', 'activate', 'saveToken']]);
         $this->middleware('jwt.verify', ['except' => ['checkLicense', 'activate', 'saveToken']]);
-        $this->middleware('device', ['except' => ['checkLicense', 'activate', 'saveToken']]);
+        // $this->middleware('device', ['except' => ['checkLicense', 'activate', 'saveToken']]);
     }
 
     /**

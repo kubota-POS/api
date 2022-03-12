@@ -12,7 +12,7 @@ use Illuminate\Database\QueryException;
 class ShopController extends Controller
 {
     public function __construct() {
-        $this->middleware(['license', 'jwt.verify', 'device']);
+        $this->middleware(['license', 'jwt.verify']);
     }
 
     public function index() {

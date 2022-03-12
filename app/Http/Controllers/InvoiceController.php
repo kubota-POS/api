@@ -13,7 +13,7 @@ use Illuminate\Database\QueryException;
 class InvoiceController extends Controller
 {
     public function __construct() {
-        $this->middleware(['license', 'jwt.verify', 'device']);
+        $this->middleware(['license', 'jwt.verify']);
     }
 // list of invoice does not include deleted invoice
     public function index()
