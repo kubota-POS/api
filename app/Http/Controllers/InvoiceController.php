@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Validator;
 use App\Models\InvoiceModel;
+use App\Models\ItemModel;
 use Illuminate\Http\Request;
 use App\Exports\InvoiceExport;
 use App\HttpResponse\ApiResponse;
@@ -49,6 +50,12 @@ class InvoiceController extends Controller
         if($validator->fails()){
             $response = ApiResponse::BedRequest($validator->errors()->first());
             return response()->json($response['json'], $response['status']);
+        }
+
+        $updateItem = new ItemModel;
+
+        foreach($input['invoice_data'] as $item) {
+            $updateItem->where('code', $item['code'])->decrement('qty', $item['qty']);
         }
 
         $input['invoice_data'] = json_encode($input['invoice_data']);

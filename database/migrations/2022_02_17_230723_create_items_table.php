@@ -19,7 +19,7 @@ class CreateItemsTable extends Migration
             $table->string('code')->unique();
             $table->string('eng_name')->nullable()->default(null);
             $table->string('mm_name')->nullable()->default(null);
-            $table->string('model')->unique();
+            $table->string('model')->nullable()->default(null);
             $table->integer('qty')->default(0);
             $table->string('price')->nullable()->default(null);
             $table->string('percentage')->nullable()->default(0);
