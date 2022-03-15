@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Validator;
 use App\Models\ItemModel;
+use App\Models\SecondItem;
 use App\Exports\ItemExport;
 use App\Imports\ItemImport;
 use Illuminate\Support\Str;
@@ -12,6 +13,7 @@ use App\Models\CategoryModel;
 use App\HttpResponse\ApiResponse;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Database\QueryException;
+ini_set('max_execution_time', '900');
 
 class ItemController extends Controller
 {
@@ -204,5 +206,87 @@ class ItemController extends Controller
             return response()->json($response['json'], $response['status']);
         }
         
+    }
+    
+//Import Item data from another existing Db item table except 'price code'
+    public function importAnotherDb()
+    {
+        
+        $second = SecondItem::get()->all();
+        $item = ItemModel::get()->all();
+       
+        $end = count($second);
+        $fend = count($item);
+        
+        for ($i=0; $i < $end; $i++) {        
+            for($j=0; $j < $fend; $j++ ){
+                if($second[$i]['m_code']==$item[$j]['code']){
+                    $item[$j]['qty'] = $second[$i]['m_qty'];
+                    $item[$j]['percentage'] = $second[$i]['sell_percentage'];
+                    $item[$j]['location'] = $second[$i]['location'];
+                    $item[$j]['price'] = $second[$i]['price_code'];
+                    $new=$item[$j];
+                    $new->save();   
+                }
+            }
+        }
+        return "Merge DB Complete";       
+    }
+
+//After importing delte no data row(Optional)
+    public function deleteNoData()
+    {
+        $item = ItemModel::where('qty','=','0')->delete();
+        return "Delete Complete";
+    }
+
+//Change Price Code to Price value from Imported Item table
+    public function codeToPrice()
+    {
+        $item = ItemModel::get();
+        $end = count($item);
+        for ($i=0; $i < $end; $i++){
+            
+            $code = $item[$i]['price'];
+            $arr = str_split($code);
+           
+            for ($j=0; $j < count($arr); $j++){
+                if ($arr[$j]=='A') {
+                    $arr[$j]='1';
+                }
+                if ($arr[$j]=='X') {
+                    $arr[$j]='2';
+                }
+                if ($arr[$j]=='E') {
+                    $arr[$j]='3';
+                }
+                if ($arr[$j]=='P') {
+                    $arr[$j]='4';
+                }
+                if ($arr[$j]=='R') {
+                    $arr[$j]='5';
+                }
+                if ($arr[$j]=='O') {
+                    $arr[$j]='6';
+                }
+                if ($arr[$j]=='D') {
+                    $arr[$j]='7';
+                }
+                if ($arr[$j]=='U') {
+                    $arr[$j]='8';
+                }
+                if ($arr[$j]=='C') {
+                    $arr[$j]='9';
+                }
+                if ($arr[$j]=='T') {
+                    $arr[$j]='0';
+                }
+            }
+            $price = implode($arr);
+            $item[$i]['price']=$price;
+            $item[$i]->save();
+        }
+
+        return "Change Complete";
     }
 }

@@ -36,7 +36,7 @@ class InvoiceController extends Controller
 
     public function create(Request $request)
     {
-        $input = $request->only(['invoice_id', 'customer_id', 'invoice_data', 'total_amount','discount','cash_back']);
+        $input = $request->only(['pay_amount','invoice_id', 'customer_id', 'invoice_data', 'total_amount','discount','cash_back']);
 
         $validator = Validator::make($input, [
             "invoice_id" => 'required|unique:invoice',
@@ -45,6 +45,7 @@ class InvoiceController extends Controller
             "total_amount" => 'required',
             "discount" => 'required',
             "cash_back" => 'required',
+            "pay_amount" => 'required'
         ]);
 
         if($validator->fails()){

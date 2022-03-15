@@ -13,6 +13,7 @@ use App\Http\Controllers\LicenseController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\HistoryLogController;
+use App\Http\Controllers\SecondItemController;
 use App\Http\Controllers\NumberSpecificationController;
 
 /*
@@ -102,8 +103,11 @@ Route::group([
         'prefix' => 'items'
     ], function ($router) {
         Route::get('', [ItemController::class, 'index']);
+        Route::get('price', [ItemController::class, 'codeToPrice']);
+        Route::get('noData', [ItemController::class, 'deleteNoData']);
         Route::get('/export', [ItemController::class, 'export']);
         Route::get('/import', [ItemController::class, 'import']);
+        Route::get('merge', [ItemController::class, 'importAnotherDb']);
         Route::post('', [ItemController::class, 'create']);
         Route::put('/{id}', [ItemController::class, 'update']);
         Route::post('/percent', [ItemController::class, 'changePercent']);
@@ -138,8 +142,10 @@ Route::group([
     });
 
 });
-
+Route::get('secondItem',[SecondItemController::class,'index']);
+Route::get('import',[SecondItemController::class,'import']);
 Route::any('{any}', function() {
     $response = ApiResponse::NotFound('Resource Not Found');
     return response()->json($response['json'], $response['status']);
 })->where('any', '.*');
+
