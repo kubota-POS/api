@@ -39,7 +39,7 @@ class ItemController extends Controller
         $validator = Validator::make($input, [
             "eng_name" => "required",
             "code" => "required|unique:items",
-            "model" => "required|unique:items"
+            "model" => "required"
         ]);
 
         if ($validator->fails()) {

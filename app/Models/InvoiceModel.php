@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\CreditModel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -23,4 +24,8 @@ class InvoiceModel extends Model
        'cash_back',
        'created_at'
     ];
+
+    public function credit () {
+        return $this->hasOne(CreditModel::class,'invoice_id');
+    }
 }

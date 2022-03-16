@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Validator;
+use App\Models\CreditModel;
 use App\Models\InvoiceModel;
 use Illuminate\Http\Request;
 use App\Exports\InvoiceExport;
@@ -25,7 +26,7 @@ class InvoiceController extends Controller
                 $response = ApiResponse::NotFound('No invoice data');
                 return response()->json($response['json'], $response['status']);
             }
-            $invoice = InvoiceModel::get();
+            $invoice = InvoiceModel::with(['credit'])->get();
             $response = ApiResponse::Success($invoice, 'get invoice list');
             return response()->json($response['json'], $response['status']);
         } catch (QueryException $e) {
@@ -33,7 +34,7 @@ class InvoiceController extends Controller
             return response()->json($response['json'], $response['status']);
         }
     }
-
+//Create Invoice and Credit
     public function create(Request $request)
     {
         $input = $request->only(['pay_amount','invoice_id', 'customer_id', 'invoice_data', 'total_amount','discount','cash_back']);
@@ -52,10 +53,16 @@ class InvoiceController extends Controller
             $response = ApiResponse::BedRequest($validator->errors()->first());
             return response()->json($response['json'], $response['status']);
         }
-
+        
         try{
             $invoice = InvoiceModel::create($input);
-         
+            $credit = new CreditModel;
+            $total = $input['total_amount'];
+            $pay = $input['pay_amount'];
+            $credit->invoice_id = $invoice->invoice_id;
+            $credit->amount = $total-$pay;
+            $credit->credit_date = $invoice->created_at;
+            $credit->save();
             $response = ApiResponse::Success($invoice, 'get invoice list');
             return response()->json($response['json'], $response['status']);
         } catch (QueryException $e){

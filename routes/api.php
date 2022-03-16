@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\ShopController;
+use App\Http\Controllers\CreditController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\LicenseController;
@@ -125,6 +126,13 @@ Route::group([
         Route::get('/{id}', [CustomerController::class, 'detail']);
         Route::delete('/{id}', [CustomerController::class, 'delete']);
         Route::delete('', [CustomerController::class, 'deleteMultiple']);
+    });
+
+    Route::group([
+        'prefix' => 'credit'
+    ], function ($router) {
+        Route::get('', [CreditController::class, 'index']);
+        Route::put('', [CreditController::class, 'update']);
     });
 
     Route::group([
