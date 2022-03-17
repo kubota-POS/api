@@ -21,9 +21,13 @@ class CreateInvoiceTable extends Migration
             $table->string('customer_email')->nullable()->default(null);
             $table->string('customer_address')->nullable()->default(null);
             $table->longtext('invoice_data');
+            $table->bigInteger('invoice_no')->unique();
+            $table->foreignId('customer_id')->nullable();
+            $table->longtext('invoice_data')->nullable();
             $table->float('total_amount');
-            $table->float('discount');
-            $table->float('cash_back');
+            $table->float('discount')->nullable();
+            $table->float('cash_back')->nullable();
+            $table->float('pay_amount');
             $table->softDeletes();
             $table->timestamps();
         });
