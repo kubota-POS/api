@@ -1,17 +1,19 @@
 <?php
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-
 use App\HttpResponse\ApiResponse;
+
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\LicenseController;
-use App\Http\Controllers\DeviceController;
-use App\Http\Controllers\ShopController;
-use App\Http\Controllers\NumberSpecificationController;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\HistoryLogController;
 use App\Http\Controllers\ItemController;
+use App\Http\Controllers\ShopController;
+use App\Http\Controllers\DeviceController;
+use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\LicenseController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\HistoryLogController;
+use App\Http\Controllers\NumberSpecificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -59,6 +61,7 @@ Route::group([
         Route::get('', [AuthController::class, 'index']);
         Route::delete('/{id}',[AuthController::class, 'delete']);
         Route::put('/{id}',[AuthController::class, 'update']);
+        Route::put('/psw/{id}',[AuthController::class, 'passwordUpdate']);
     });
 
     Route::group([
@@ -85,6 +88,7 @@ Route::group([
         Route::post('', [CategoryController::class, 'create']);
         Route::put('/{id}', [CategoryController::class, 'update']);
         Route::delete('/{id}', [CategoryController::class, 'delete']);
+        Route::delete('', [CategoryController::class, 'deleteMultiple']);
     });
 
     Route::group([
@@ -98,11 +102,40 @@ Route::group([
         'prefix' => 'items'
     ], function ($router) {
         Route::get('', [ItemController::class, 'index']);
+        Route::get('/export', [ItemController::class, 'export']);
+        Route::get('/import', [ItemController::class, 'import']);
         Route::post('', [ItemController::class, 'create']);
         Route::put('/{id}', [ItemController::class, 'update']);
+        Route::post('/percentage', [ItemController::class, 'updatePercentage']);
+        // Route::post('/percent', [ItemController::class, 'changePercent']);
         Route::get('/{id}', [ItemController::class, 'detail']);
         Route::delete('/{id}', [ItemController::class, 'delete']);
         Route::post('/delete', [ItemController::class, 'deleteMultiple']);
+    });
+
+    Route::group([
+        'prefix' => 'customer'
+    ], function ($router) {
+        Route::get('', [CustomerController::class, 'index']);
+        Route::post('', [CustomerController::class, 'create']);
+        Route::put('/{id}', [CustomerController::class, 'update']);
+        Route::get('/{id}', [CustomerController::class, 'detail']);
+        Route::delete('/{id}', [CustomerController::class, 'delete']);
+        Route::delete('', [CustomerController::class, 'deleteMultiple']);
+    });
+
+    Route::group([
+        'prefix' => 'invoice'
+    ], function ($router) {
+        Route::get('', [InvoiceController::class, 'index']);
+        Route::get('/export', [InvoiceController::class, 'export']);
+        Route::get('byDate', [InvoiceController::class, 'listByDate']);
+        Route::post('', [InvoiceController::class, 'create']);
+        Route::post('store', [InvoiceController::class, 'test']);
+        Route::delete('/{id}', [InvoiceController::class, 'delete']);
+        Route::get('restore', [InvoiceController::class, 'restore']);
+        Route::get('deleted', [InvoiceController::class, 'deletedList']);
+        Route::delete('permanentDel/{id}', [InvoiceController::class, 'permanentDelete']);
     });
 
 });
