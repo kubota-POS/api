@@ -20,7 +20,6 @@ class CreateInvoiceTable extends Migration
             $table->string('customer_phone')->nullable()->default(null);
             $table->string('customer_email')->nullable()->default(null);
             $table->string('customer_address')->nullable()->default(null);
-            $table->longtext('invoice_data');
             $table->bigInteger('invoice_no')->unique();
             $table->foreignId('customer_id')->nullable();
             $table->longtext('invoice_data')->nullable();
