@@ -3,9 +3,15 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use bfinlay\SpreadsheetSeeder\SpreadsheetSeeder;
+use App\Imports\ItemImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class DatabaseSeeder extends Seeder
 {
+    public function __construct() {
+    }
+
     /**
      * Seed the application's database.
      *
@@ -18,23 +24,18 @@ class DatabaseSeeder extends Seeder
                 "set_number" => $x
             ]);
         }
+        
+        $this->command->info("Number Specification seeding completed successfully");
 
         \App\Models\CategoryModel::factory()->create([
             "name" => "kubota"
         ]);
 
-        for($x=1; $x<1000; $x++) {
-            \App\Models\ItemModel::factory()->create([
-                "category_id" => 1,
-                "code" => "CODE_" . $x,
-                "eng_name" => "ENG_NAME_" . $x,
-                "mm_name" => "MM_NAME_" . $x,
-                "model" => "MODEL_" . $x,
-                "qty" => 10 * $x,
-                "price" => 100 * $x,
-                "percentage" => 20,
-            ]); 
-        }
+        $this->command->info("Import item category for kubota seeding completed successfully");
 
+        $path = storage_path('../database/seeders/items.xlsx');
+        Excel::import(new ItemImport, $path);
+
+        $this->command->info("Import item of kubota seeding completed successfully");
     }
 }
