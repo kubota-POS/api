@@ -14,14 +14,15 @@ class CreateCreditTable extends Migration
     public function up()
     {
         Schema::create('credit', function (Blueprint $table) {
-            $table->id();
-            $table->bigInteger('invoice_id')->unsigned()->nullable();
+            $table->bigIncrements('id');
+            $table->unsignedBigInteger('invoice_id')->unique();
+            $table->bigInteger('invoice_no')->unique();
             $table->date('credit_date')->nullable();
             $table->integer('amount')->nullable();
             $table->longtext('repayment')->nullable();
             $table->timestamps();
 
-            $table->foreign('invoice_id')->references('invoice_id')->on('invoice')->onDelete('cascade');
+            $table->foreign('invoice_id')->references('id')->on('invoice')->onDelete('cascade');
         });
     }
 

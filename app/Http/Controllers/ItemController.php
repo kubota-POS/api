@@ -122,7 +122,7 @@ class ItemController extends Controller
 
     public function import() 
     {
-        $path = storage_path('app/list.xlsx');
+        $path = storage_path('app/new.xlsx');
         Excel::import(new ItemImport, $path);
         
         $item = ItemModel::all();

@@ -15,7 +15,7 @@ class InvoiceModel extends Model
     protected $table = 'invoice';
 
     protected $fillable = [
-       'invoice_id',
+       'invoice_no',
        'pay_amount',
        'customer_id',
        'invoice_data',
@@ -25,7 +25,12 @@ class InvoiceModel extends Model
        'created_at'
     ];
 
+    protected $hidden = [
+        'created_at', 'updated_at', 'deleted_at'
+    ];
+
+
     public function credit () {
-        return $this->hasOne(CreditModel::class,'invoice_id');
+        return $this->hasOne(CreditModel::class, 'invoice_id');
     }
 }

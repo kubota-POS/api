@@ -37,10 +37,10 @@ class InvoiceController extends Controller
 //Create Invoice and Credit
     public function create(Request $request)
     {
-        $input = $request->only(['pay_amount','invoice_id', 'customer_id', 'invoice_data', 'total_amount','discount','cash_back']);
+        $input = $request->only(['pay_amount','invoice_no', 'customer_id', 'invoice_data', 'total_amount','discount','cash_back']);
 
         $validator = Validator::make($input, [
-            "invoice_id" => 'required|unique:invoice',
+            "invoice_no" => 'required|unique:invoice',
             "customer_id" => 'required',
             "invoice_data" => 'required',
             "total_amount" => 'required',
@@ -59,8 +59,13 @@ class InvoiceController extends Controller
             $credit = new CreditModel;
             $total = $input['total_amount'];
             $pay = $input['pay_amount'];
-            $credit->invoice_id = $invoice->invoice_id;
+            $credit->invoice_id = $invoice->id;
+            $credit->invoice_no = $invoice->invoice_no;
             $credit->amount = $total-$pay;
+            if($credit->amount==0){
+                $response = ApiResponse::Success($invoice, 'get invoice list');
+                return response()->json($response['json'], $response['status']);    
+            }   
             $credit->credit_date = $invoice->created_at;
             $credit->save();
             $response = ApiResponse::Success($invoice, 'get invoice list');
@@ -166,7 +171,7 @@ class InvoiceController extends Controller
         try {
             $start=$request->start_date;
             $end=$request->end_date;
-            $get = InvoiceModel::whereBetween('created_at', [$start, $end])->get()->all();
+            $get = InvoiceModel::whereBetween('created_at', [$start, $end])->with(['credit'])->get()->all();
             $response = ApiResponse::Success($get, 'get invoice list');
             return response()->json($response['json'], $response['status']);   
         } catch (QueryException $e) {

@@ -12,11 +12,11 @@ class CreditModel extends Model
     protected $table = 'credit';
 
     protected $fillable = [
-        'invoice_id', 'credit_date', 'amount','repayment'
+        'invoice_no', 'credit_date', 'amount','repayment'
     ];
 
     protected $hidden = [
-        'created_at', 'updated_at'
+        'created_at', 'updated_at', 'deleted_at'
     ];
 
     public function invoice () {
