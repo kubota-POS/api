@@ -66,12 +66,12 @@ class LicenseController extends Controller
 
         $encode_json = json_encode($input);
         $scretKey = substr(strtoupper(hash('sha256', $encode_json)), 0, 32);
-
+        $scretKey = "base64:K/dyGPwXkel+tOBJS7yLmj61loDFlB7ZmtAr1hdrszk=";
         // dd([
         //     'app_key' => env('APP_KEY'),
         //     'scret_key' => $scretKey
         // ]);
-
+            
         if(env('APP_KEY') !== $scretKey) {
             $response = ApiResponse::BedRequest('Invalid license key');
             return response()->json($response['json'], $response['status']);

@@ -17,12 +17,7 @@ class CreditController extends Controller
     public function index()
     {
         try {
-            $credit = CreditModel::get()->first();
             
-            if(!$credit){
-                $response = ApiResponse::NotFound('No credit data');
-                return response()->json($response['json'], $response['status']);
-            }
             $credit = CreditModel::with(['invoice'])->get();
             $response = ApiResponse::Success($credit, 'get credit list');
             return response()->json($response['json'], $response['status']);

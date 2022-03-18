@@ -21,19 +21,14 @@ class InvoiceController extends Controller
     public function index()
     {
         try {
-            $invoice = InvoiceModel::get()->first();
-            
-            if(!$invoice){
-                $response = ApiResponse::Success('No invoice data');
-                return response()->json($response['json'], $response['status']);
-            }
+           
             $invoice = InvoiceModel::with(['credit'])->get();
             $response = ApiResponse::Success($invoice, 'get invoice list');
             return response()->json($response['json'], $response['status']);
         } catch (QueryException $e) {
             $response = ApiResponse::Unknown('something was wrong');
             return response()->json($response['json'], $response['status']);
-        }
+        } 
     }
 //Create Invoice and Credit
     public function create(Request $request)
