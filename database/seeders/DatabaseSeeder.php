@@ -19,17 +19,17 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // for($x=0; $x<=9; $x++) {
-        //     \App\Models\NumberSpecificationModel::factory()->create([
-        //         "set_number" => $x
-        //     ]);
-        // }
+        for($x=0; $x<=9; $x++) {
+            \App\Models\NumberSpecificationModel::factory()->create([
+                "set_number" => $x
+            ]);
+        }
         
-        // $this->command->info("Number Specification seeding completed successfully");
+        $this->command->info("Number Specification seeding completed successfully");
 
-        // \App\Models\CategoryModel::factory()->create([
-        //     "name" => "kubota"
-        // ]);
+        \App\Models\CategoryModel::factory()->create([
+            "name" => "kubota"
+        ]);
 
         $this->command->info("Import item category for kubota seeding completed successfully");
 

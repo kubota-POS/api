@@ -149,6 +149,7 @@ Route::group([
         Route::get('restore', [InvoiceController::class, 'restore']);
         Route::get('deleted', [InvoiceController::class, 'deletedList']);
         Route::delete('permanentDel/{id}', [InvoiceController::class, 'permanentDelete']);
+        Route::get('/lastInvoice', [InvoiceController::class,'lastInvoice']);
     });
 
 });

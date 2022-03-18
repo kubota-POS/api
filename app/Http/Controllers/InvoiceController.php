@@ -24,9 +24,10 @@ class InvoiceController extends Controller
             $invoice = InvoiceModel::get()->first();
             
             if(!$invoice){
-                $response = ApiResponse::NotFound('No invoice data');
+                $response = ApiResponse::Success([], 'No invoice data');
                 return response()->json($response['json'], $response['status']);
             }
+
             $invoice = InvoiceModel::with(['credit'])->get();
             $response = ApiResponse::Success($invoice, 'get invoice list');
             return response()->json($response['json'], $response['status']);
@@ -35,19 +36,41 @@ class InvoiceController extends Controller
             return response()->json($response['json'], $response['status']);
         }
     }
-//Create Invoice and Credit
+
+    //  Get Last Invoice;
+    public function lastInvoice () 
+    {
+        try {
+            $invoice = InvoiceModel::latest()->first();
+            $response = ApiResponse::Success($invoice, 'get invoice list');
+            return response()->json($response['json'], $response['status']);
+        } catch(QueryException $e) {
+            $response = ApiResponse::Unknown('something was wrong');
+            return response()->json($response['json'], $response['status']);
+        }
+    }
+    
+    //Create Invoice and Credit
     public function create(Request $request)
     {
-        $input = $request->only(['invoice_id', 'customer_name', 'customer_phone', 'customer_email', 'customer_address', 'invoice_data', 'total_amount','discount','cash_back']);
+        $input = $request->only([
+            'invoice_no', 
+            'customer_name', 'customer_phone', 'customer_email', 'customer_address', 
+            'invoice_data', 
+            'total_amount',
+            'discount', 
+            'pay_amount',
+            'credit_amount'
+        ]);
 
         $validator = Validator::make($input, [
             "invoice_no" => 'required|unique:invoice',
-            "customer_id" => 'required',
             "invoice_data" => 'required',
             "total_amount" => 'required',
-            "discount" => 'required',
-            "cash_back" => 'required',
-            "pay_amount" => 'required'
+            "pay_amount" => 'required',
+            'discount' => 'required',
+            'pay_amount' => 'required',
+            'credit_amount' => 'required'
         ]);
 
         if($validator->fails()){
@@ -58,7 +81,7 @@ class InvoiceController extends Controller
         $updateItem = new ItemModel;
 
         foreach($input['invoice_data'] as $item) {
-            $updateItem->where('code', $item['code'])->decrement('qty', $item['qty']);
+            $updateItem->where('code', $item['code'])->decrement('qty', $item['requestQty']);
         }
 
         $input['invoice_data'] = json_encode($input['invoice_data']);
@@ -66,6 +89,7 @@ class InvoiceController extends Controller
         
         try{
             $invoice = InvoiceModel::create($input);
+
             $credit = new CreditModel;
             $total = $input['total_amount'];
             $pay = $input['pay_amount'];

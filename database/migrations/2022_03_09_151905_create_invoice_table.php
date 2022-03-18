@@ -15,18 +15,16 @@ class CreateInvoiceTable extends Migration
     {
         Schema::create('invoice', function (Blueprint $table) {
             $table->id();
-            $table->string('invoice_id')->unique();
+            $table->string('invoice_no')->unique();
             $table->string('customer_name')->nullable()->default(null);
             $table->string('customer_phone')->nullable()->default(null);
             $table->string('customer_email')->nullable()->default(null);
             $table->string('customer_address')->nullable()->default(null);
-            $table->bigInteger('invoice_no')->unique();
-            $table->foreignId('customer_id')->nullable();
-            $table->longtext('invoice_data')->nullable();
+            $table->longtext('invoice_data');
             $table->float('total_amount');
-            $table->float('discount')->nullable();
-            $table->float('cash_back')->nullable();
             $table->float('pay_amount');
+            $table->float('discount')->nullable()->default(0);
+            $table->float('credit_mount')->nullable()->default(0);
             $table->softDeletes();
             $table->timestamps();
         });
