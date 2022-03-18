@@ -133,8 +133,8 @@ Route::group([
         'prefix' => 'credit'
     ], function ($router) {
         Route::get('', [CreditController::class, 'index']);
-        Route::get('{id}', [CreditController::class, 'show']);
-        Route::put('{id}', [CreditController::class, 'update']);
+        Route::get('/{id}', [CreditController::class, 'show']);
+        Route::put('/{id}', [CreditController::class, 'update']);
     });
 
     Route::group([

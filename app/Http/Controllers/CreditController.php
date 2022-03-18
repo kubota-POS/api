@@ -11,36 +11,36 @@ use Validator;
 class CreditController extends Controller
 {
     public function __construct() {
-        $this->middleware(['license', 'jwt.verify', 'device']);
+        // $this->middleware(['license', 'jwt.verify', 'device']);
     }
-//get Credit List
+
+    //get Credit List
     public function index()
     {
         try {
-            $credit = CreditModel::get()->first();
-            
-            if(!$credit){
-                $response = ApiResponse::NotFound('No credit data');
-                return response()->json($response['json'], $response['status']);
-            }
-            $credit = CreditModel::with(['invoice'])->get();
-            $response = ApiResponse::Success($credit, 'get credit list');
+            $credits = CreditModel::with(['invoice'])->get();
+            $response = ApiResponse::Success($credits, 'get credits list');
             return response()->json($response['json'], $response['status']);
         } catch (QueryException $e) {
             $response = ApiResponse::Unknown('something was wrong');
             return response()->json($response['json'], $response['status']);
         }
     }
-//get Credit detail by Invoice_ID
+
+    //get Credit detail by Invoice_ID
     public function show(Request $request)
     {
         try {
-            $credit = CreditModel::where('invoice_no',$request['id'])->get()->first();
+            $credit = CreditModel::where('invoice_id',$request->id)->with(['invoice'])->get()->first();
+
             if(!$credit){
                 $response = ApiResponse::NotFound('Credit not found');
                 return response()->json($response['json'], $response['status']);
             }
-            $credit = CreditModel::where('invoice_no',$request['id'])->with(['invoice'])->get();
+
+            $credit->repayment = json_decode($credit->repayment);
+            $credit->invoice->invoice_data = json_decode($credit->invoice->invoice_data);
+
             $response = ApiResponse::Success($credit, 'get credit list');
             return response()->json($response['json'], $response['status']);
         } catch (QueryException $e) {
@@ -48,7 +48,8 @@ class CreditController extends Controller
             return response()->json($response['json'], $response['status']);
         }
     }
-//update Credit by invoice_id
+
+    //update Credit by invoice_id
     public function update(Request $request)
     {
         $input = $request->only(['repayment']);

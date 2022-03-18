@@ -15,23 +15,21 @@ class InvoiceModel extends Model
     protected $table = 'invoice';
 
     protected $fillable = [
-       'invoice_id',
        'customer_name',
        'customer_email',
        'customer_phone',
        'customer_address',
        'invoice_no',
        'pay_amount',
-       'customer_id',
        'invoice_data',
        'total_amount',
        'discount',
-       'cash_back',
+       'credit_amount',
        'created_at'
     ];
 
     protected $hidden = [
-        'created_at', 'updated_at', 'deleted_at'
+        'updated_at', 'deleted_at'
     ];
 
 

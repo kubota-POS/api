@@ -24,7 +24,7 @@ class CreateInvoiceTable extends Migration
             $table->float('total_amount');
             $table->float('pay_amount');
             $table->float('discount')->nullable()->default(0);
-            $table->float('credit_mount')->nullable()->default(0);
+            $table->float('credit_amount')->nullable()->default(0);
             $table->softDeletes();
             $table->timestamps();
         });

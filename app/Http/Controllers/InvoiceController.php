@@ -11,6 +11,7 @@ use App\Exports\InvoiceExport;
 use App\HttpResponse\ApiResponse;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Database\QueryException;
+use \Carbon\Carbon;
 
 class InvoiceController extends Controller
 {
@@ -69,7 +70,6 @@ class InvoiceController extends Controller
             "total_amount" => 'required',
             "pay_amount" => 'required',
             'discount' => 'required',
-            'pay_amount' => 'required',
             'credit_amount' => 'required'
         ]);
 
@@ -84,29 +84,46 @@ class InvoiceController extends Controller
             $updateItem->where('code', $item['code'])->decrement('qty', $item['requestQty']);
         }
 
+        $invoiceData = $input['invoice_data'];
+
         $input['invoice_data'] = json_encode($input['invoice_data']);
 
-        
         try{
             $invoice = InvoiceModel::create($input);
 
-            $credit = new CreditModel;
-            $total = $input['total_amount'];
-            $pay = $input['pay_amount'];
-            $credit->invoice_id = $invoice->id;
-            $credit->invoice_no = $invoice->invoice_no;
-            $credit->amount = $total-$pay;
-            if($credit->amount==0){
-                $response = ApiResponse::Success($invoice, 'get invoice list');
-                return response()->json($response['json'], $response['status']);    
-            }   
-            $credit->credit_date = $invoice->created_at;
-            $credit->save();
-            $response = ApiResponse::Success($invoice, 'get invoice list');
+            if($input['credit_amount'] > 0) {
+                $repayments = [];
+
+                array_push($repayments, [
+                    'pay_amount' => (float)$input['pay_amount'],
+                    'pay_date' => Carbon::now()->timestamp
+                ]);
+
+                $creditInput = [
+                    'invoice_id' => $invoice->id,
+                    'invoice_no' => $input['invoice_no'],
+                    'amount' => $input['credit_amount'],
+                    'repayment' => json_encode($repayments)
+                ];
+
+                $credit = CreditModel::create($creditInput);
+                $response = ApiResponse::Success([
+                    "invoice" => $invoice,
+                    "credit" => $credit
+                ], 'invoice created');
+                return response()->json($response['json'], $response['status']);
+            }
+
+            $response = ApiResponse::Success([
+                "invoice" => $invoice,
+                "credit" => null
+            ], 'invoice created');
             return response()->json($response['json'], $response['status']);
+            
         } catch (QueryException $e){
+            dd($e);
             $response = ApiResponse::Unknown('unknown error');
-                return response()->json($response['json'], $response['status']); 
+            return response()->json($response['json'], $response['status']); 
         }
     }
 //softDelete
