@@ -7,12 +7,14 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\ShopController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\CreditController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\LicenseController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\MerchantController;
 use App\Http\Controllers\HistoryLogController;
 use App\Http\Controllers\SecondItemController;
 use App\Http\Controllers\NumberSpecificationController;
@@ -145,6 +147,26 @@ Route::group([
         Route::get('restore', [InvoiceController::class, 'restore']);
         Route::get('deleted', [InvoiceController::class, 'deletedList']);
         Route::delete('permanentDel/{id}', [InvoiceController::class, 'permanentDelete']);
+    });
+
+    Route::group([
+        'prefix' => 'order'
+    ], function ($router) {
+        Route::get('', [OrderController::class, 'index']);
+        Route::post('', [OrderController::class, 'create']);
+        Route::get('{id}', [OrderController::class, 'detail']);
+        Route::put('{id}', [OrderController::class, 'update']);
+        Route::delete('{id}', [OrderController::class, 'delete']);
+    });
+
+    Route::group([
+        'prefix' => 'merchant'
+    ], function ($router) {
+        Route::get('', [MerchantController::class, 'index']);
+        Route::post('', [MerchantController::class, 'create']);
+        Route::get('{id}', [MerchantController::class, 'detail']);
+        Route::put('{id}', [MerchantController::class, 'update']);
+        Route::delete('{id}', [MerchantController::class, 'delete']);
     });
 
 });
