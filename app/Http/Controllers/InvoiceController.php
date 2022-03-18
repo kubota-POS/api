@@ -68,6 +68,7 @@ class InvoiceController extends Controller
             }   
             $credit->credit_date = $invoice->created_at;
             $credit->save();
+            $invoice = InvoiceModel::where('invoice_no',$input['invoice_no'])->with(['credit'])->get();
             $response = ApiResponse::Success($invoice, 'get invoice list');
             return response()->json($response['json'], $response['status']);
         } catch (QueryException $e){
@@ -178,16 +179,6 @@ class InvoiceController extends Controller
             $response = ApiResponse::Unknown('someting was wrong');
             return response()->json($response['json'], $response['status']);
         }
-    }
-//test for store fakeDate
-    public function test(Request $request)
-    {
-        $input = $request->only(['created_at','invoice_id', 'customer_id', 'invoice_data', 'total_amount','discount','cash_back']);
-
-            $invoice = InvoiceModel::create($input);
-         
-            $response = ApiResponse::Success($invoice, 'get invoice list');
-            return response()->json($response['json'], $response['status']);
     }
 //ExcelExport
     public function export() 

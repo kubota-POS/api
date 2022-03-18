@@ -206,39 +206,7 @@ class ItemController extends Controller
             return response()->json($response['json'], $response['status']);
         }
         
-    }
-    
-//Import Item data from another existing Db item table except 'price code'
-    public function importAnotherDb()
-    {
-        
-        $second = SecondItem::get()->all();
-        $item = ItemModel::get()->all();
-       
-        $end = count($second);
-        $fend = count($item);
-        
-        for ($i=0; $i < $end; $i++) {        
-            for($j=0; $j < $fend; $j++ ){
-                if($second[$i]['m_code']==$item[$j]['code']){
-                    $item[$j]['qty'] = $second[$i]['m_qty'];
-                    $item[$j]['percentage'] = $second[$i]['sell_percentage'];
-                    $item[$j]['location'] = $second[$i]['location'];
-                    $item[$j]['price'] = $second[$i]['price_code'];
-                    $new=$item[$j];
-                    $new->save();   
-                }
-            }
-        }
-        return "Merge DB Complete";       
-    }
-
-//After importing delte no data row(Optional)
-    public function deleteNoData()
-    {
-        $item = ItemModel::where('qty','=','0')->delete();
-        return "Delete Complete";
-    }
+    }   
 
 //Change Price Code to Price value from Imported Item table
     public function codeToPrice()
