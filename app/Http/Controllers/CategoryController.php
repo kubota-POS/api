@@ -11,12 +11,12 @@ use Illuminate\Database\QueryException;
 class CategoryController extends Controller
 {
     public function __construct() {
-        $this->middleware(['license', 'jwt.verify', 'device']);
+        $this->middleware(['license', 'jwt.verify']);
     }
 
     public function index () {
         try {
-            $categories = CategoryModel::with(['items'])->get();
+            $categories = CategoryModel::get();
             $response = ApiResponse::Success($categories, 'get categories list');
             return response()->json($response['json'], $response['status']);
         } catch (QueryException $e) {
@@ -129,7 +129,7 @@ class CategoryController extends Controller
         $id = $request->id;
 
         try {
-            $category = CategoryModel::find($id);
+            $category = CategoryModel::with(['items'])->find($id);
 
             if(!$category) {
                 $response = ApiResponse::NotFound('category is not found');

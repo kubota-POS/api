@@ -19,7 +19,8 @@ class ItemController extends Controller
 {
 
     public function __construct() {
-        $this->middleware(['license', 'jwt.verify', 'device']);
+       // $this->middleware(['license', 'jwt.verify']);
+
     }
 
     public function index () {
@@ -34,7 +35,7 @@ class ItemController extends Controller
     }
 
     public function create (Request $request) {
-        $input = $request->only(['category_id', 'code', 'eng_name', 'mm_name', 'model', 'qty', 'price', 'location', 'active','percentage','fix_amount']);
+        $input = $request->only(['category_id', 'code', 'eng_name', 'mm_name', 'model', 'qty', 'price', 'percentage', 'location', 'active']);
 
         $validator = Validator::make($input, [
             "eng_name" => "required",
@@ -99,6 +100,39 @@ class ItemController extends Controller
         }
     }
 
+    public function updatePercentage(Request $request) {
+        $input = $request->only(['amount', 'type']);
+
+        $validator = Validator::make($input, [
+            "amount" => "required",
+            "type" => "required"
+        ]);
+
+        if ($validator->fails()) {
+            $response = ApiResponse::BedRequest($validator->errors()->first());
+            return response()->json($response['json'], $response['status']);
+        }
+
+        try {
+            $newItem = new ItemModel;
+            if($input['type'] ==='increment') {
+                $newItem->increment('percentage', $request->amount);
+            }
+
+            if($input['type'] === 'decrement') {
+                $newItem->decrement('percentage', $request->amount);
+            }
+
+            $newItem->update();
+
+            $response = ApiResponse::Success($newItem, "item's percentage are updated");
+            return response()->json($response['json'], $response['status']);
+        } catch (QueryException $e) {
+            $response = ApiResponse::Unknown('someting was wrong');
+            return response()->json($response['json'], $response['status']);
+        }
+    }
+
     public function delete(Request $request) {
         $id = $request->id;
 
@@ -122,10 +156,10 @@ class ItemController extends Controller
 
     public function import() 
     {
-        $path = storage_path('app/new.xlsx');
+        $path = storage_path('app/lists.xlsx');
         Excel::import(new ItemImport, $path);
-        
-        $item = ItemModel::all();
+        // $item = ItemModel::all();
+
         return "Sucessfully Imported";
     }
 
@@ -137,7 +171,7 @@ class ItemController extends Controller
     public function deleteMultiple(Request $request) {
         $ids=$request->data;
         $input = $request->only(['data']);
-        $deleteditem = ItemModel::find($ids);
+        
         $validator = Validator::make($input, [
             "data" => "required"
         ]);
@@ -148,8 +182,10 @@ class ItemController extends Controller
         }
 
         try {
+            $deleteditem = ItemModel::find($ids);
             $ids = $input['data'];
             $item = ItemModel::whereIn('id', $ids)->delete();
+        
             $response = ApiResponse::Success($deleteditem, 'items are deleted');
             return response()->json($response['json'], $response['status']);
 
@@ -157,104 +193,133 @@ class ItemController extends Controller
             $response = ApiResponse::Unknown('someting was wrong');
             return response()->json($response['json'], $response['status']);
         }
-
     }
 
-    public function changePercent(Request $request)
-    {
+    // public function changePercent(Request $request)
+    // {
         
-        $input = $request->only(['data']);
-        $validator = Validator::make($input, [
-            "data" => "required"
-        ]);
+    //     $input = $request->only(['data']);
+    //     $validator = Validator::make($input, [
+    //         "data" => "required"
+    //     ]);
 
-        if ($validator->fails()) {
-            $response = ApiResponse::BedRequest($validator->errors()->first());
-            return response()->json($response['json'], $response['status']);
-        }
-        $data = $request->data;
-        $plus = Str::contains($data, '+');
-        $minus = Str::contains($data, '-');
-        $num = (int)substr($data,1);
+    //     if ($validator->fails()) {
+    //         $response = ApiResponse::BedRequest($validator->errors()->first());
+    //         return response()->json($response['json'], $response['status']);
+    //     }
+    //     $data = $request->data;
+    //     $plus = Str::contains($data, '+');
+    //     $minus = Str::contains($data, '-');
+    //     $num = (int)substr($data,1);
 
 
-        $model = ItemModel::get()->all();
-        $end = count($model);
-        try {
-            if($plus){
-                for ($i=0; $i < $end; $i++) { 
-                    $model[$i]['percentage']+=$num;
-                    $new=$model[$i];
-                    $new->save();
-                }
-            }
+    //     $model = ItemModel::get()->all();
+    //     $end = count($model);
+    //     try {
+    //         if($plus){
+    //             for ($i=0; $i < $end; $i++) { 
+    //                 $model[$i]['percentage']+=$num;
+    //                 $new=$model[$i];
+    //                 $new->save();
+    //             }
+    //         }
             
-            if($minus){
-                for ($i=0; $i < $end; $i++) { 
-                    $model[$i]['percentage']-=$num;
-                    $new=$model[$i];
-                    $new->save();
-                }
-            }    
+    //         if($minus){
+    //             for ($i=0; $i < $end; $i++) { 
+    //                 $model[$i]['percentage']-=$num;
+    //                 $new=$model[$i];
+    //                 $new->save();
+    //             }
+    //         }    
 
-            $item = ItemModel::get()->all();
-            $response = ApiResponse::Success($item, 'All Percentage are updated');
-            return response()->json($response['json'], $response['status']);
+    //         $item = ItemModel::get()->all();
+    //         $response = ApiResponse::Success($item, 'All Percentage are updated');
+    //         return response()->json($response['json'], $response['status']);
 
-        } catch (QueryException $e) {
-            $response = ApiResponse::Unknown('someting was wrong');
-            return response()->json($response['json'], $response['status']);
-        }
+    //     } catch (QueryException $e) {
+    //         $response = ApiResponse::Unknown('someting was wrong');
+    //         return response()->json($response['json'], $response['status']);
+    //     }
+    
+//Import Item data from another existing Db item table except 'price code'
+    // public function importAnotherDb()
+    // {
         
-    }   
+    //     $second = SecondItem::get()->all();
+    //     $item = ItemModel::get()->all();
+       
+    //     $end = count($second);
+    //     $fend = count($item);
+        
+    //     for ($i=0; $i < $end; $i++) {        
+    //         for($j=0; $j < $fend; $j++ ){
+    //             if($second[$i]['m_code']==$item[$j]['code']){
+    //                 $item[$j]['qty'] = $second[$i]['m_qty'];
+    //                 $item[$j]['percentage'] = $second[$i]['sell_percentage'];
+    //                 $item[$j]['location'] = $second[$i]['location'];
+    //                 $item[$j]['price'] = $second[$i]['price_code'];
+    //                 $new=$item[$j];
+    //                 $new->save();   
+    //             }
+    //         }
+    //     }
+    //     return "Merge DB Complete";       
+    // }
+
+//After importing delte no data row(Optional)
+    // public function deleteNoData()
+    // {
+    //     $item = ItemModel::where('qty','=','0')->delete();
+    //     return "Delete Complete";
+    // }
 
 //Change Price Code to Price value from Imported Item table
-    public function codeToPrice()
-    {
-        $item = ItemModel::get();
-        $end = count($item);
-        for ($i=0; $i < $end; $i++){
+    // public function codeToPrice()
+    // {
+    //     $item = ItemModel::get();
+    //     $end = count($item);
+    //     for ($i=0; $i < $end; $i++){
             
-            $code = $item[$i]['price'];
-            $arr = str_split($code);
+    //         $code = $item[$i]['price'];
+    //         $arr = str_split($code);
            
-            for ($j=0; $j < count($arr); $j++){
-                if ($arr[$j]=='A') {
-                    $arr[$j]='1';
-                }
-                if ($arr[$j]=='X') {
-                    $arr[$j]='2';
-                }
-                if ($arr[$j]=='E') {
-                    $arr[$j]='3';
-                }
-                if ($arr[$j]=='P') {
-                    $arr[$j]='4';
-                }
-                if ($arr[$j]=='R') {
-                    $arr[$j]='5';
-                }
-                if ($arr[$j]=='O') {
-                    $arr[$j]='6';
-                }
-                if ($arr[$j]=='D') {
-                    $arr[$j]='7';
-                }
-                if ($arr[$j]=='U') {
-                    $arr[$j]='8';
-                }
-                if ($arr[$j]=='C') {
-                    $arr[$j]='9';
-                }
-                if ($arr[$j]=='T') {
-                    $arr[$j]='0';
-                }
-            }
-            $price = implode($arr);
-            $item[$i]['price']=$price;
-            $item[$i]->save();
-        }
+    //         for ($j=0; $j < count($arr); $j++){
+    //             if ($arr[$j]=='A') {
+    //                 $arr[$j]='1';
+    //             }
+    //             if ($arr[$j]=='X') {
+    //                 $arr[$j]='2';
+    //             }
+    //             if ($arr[$j]=='E') {
+    //                 $arr[$j]='3';
+    //             }
+    //             if ($arr[$j]=='P') {
+    //                 $arr[$j]='4';
+    //             }
+    //             if ($arr[$j]=='R') {
+    //                 $arr[$j]='5';
+    //             }
+    //             if ($arr[$j]=='O') {
+    //                 $arr[$j]='6';
+    //             }
+    //             if ($arr[$j]=='D') {
+    //                 $arr[$j]='7';
+    //             }
+    //             if ($arr[$j]=='U') {
+    //                 $arr[$j]='8';
+    //             }
+    //             if ($arr[$j]=='C') {
+    //                 $arr[$j]='9';
+    //             }
+    //             if ($arr[$j]=='T') {
+    //                 $arr[$j]='0';
+    //             }
+    //         }
+    //         $price = implode($arr);
+    //         $item[$i]['price']=$price;
+    //         $item[$i]->save();
+    //     }
 
-        return "Change Complete";
-    }
+    //     return "Change Complete";
+    // }
 }

@@ -24,15 +24,14 @@ class ItemImport implements ToModel, WithHeadingRow, SkipsOnError
     public function model(array $row)
     {
         return new ItemModel([
-           'code'     => $row['code'],
-           'eng_name'    => $row['eng_name'], 
-           'model' => $row['model'],
-           'qty' => $row['qty'],
-           'price' => $row['price'],
-           'percentage' => $row['percentage'],
-           'fix_amount' => $row['fix_amount'],
-           'location' => $row['location'],
-           'active' => $row['active']
+            'code' => $row['material_code'],
+            'eng_name' => $row['material_name'],
+            'mm_name' => null,
+            'model' => $row['model'],
+            'qty' => 0,
+            'price' => 0,
+            'percentage' => 0,
+            'location' => null
         ]);
     }
     public function onError(Throwable $e)

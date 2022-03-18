@@ -11,7 +11,7 @@ use Illuminate\Database\QueryException;
 class CustomerController extends Controller
 {
     public function __construct() {
-        $this->middleware(['license', 'jwt.verify', 'device']);
+        $this->middleware(['license', 'jwt.verify']);
     }
 
     public function index()
@@ -32,7 +32,7 @@ class CustomerController extends Controller
 
         $validator = Validator::make($input, [
             "name" => 'required',
-            "phone" => 'required|unique:customers'
+            "phone" => 'required'
         ]);
 
         if($validator->fails()){

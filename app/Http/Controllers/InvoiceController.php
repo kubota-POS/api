@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Validator;
 use App\Models\CreditModel;
 use App\Models\InvoiceModel;
+use App\Models\ItemModel;
 use Illuminate\Http\Request;
 use App\Exports\InvoiceExport;
 use App\HttpResponse\ApiResponse;
@@ -14,7 +15,7 @@ use Illuminate\Database\QueryException;
 class InvoiceController extends Controller
 {
     public function __construct() {
-        $this->middleware(['license', 'jwt.verify', 'device']);
+        $this->middleware(['license', 'jwt.verify']);
     }
 // list of invoice does not include deleted invoice
     public function index()
@@ -23,7 +24,7 @@ class InvoiceController extends Controller
             $invoice = InvoiceModel::get()->first();
             
             if(!$invoice){
-                $response = ApiResponse::NotFound('No invoice data');
+                $response = ApiResponse::Success('No invoice data');
                 return response()->json($response['json'], $response['status']);
             }
             $invoice = InvoiceModel::with(['credit'])->get();
@@ -37,7 +38,7 @@ class InvoiceController extends Controller
 //Create Invoice and Credit
     public function create(Request $request)
     {
-        $input = $request->only(['pay_amount','invoice_no', 'customer_id', 'invoice_data', 'total_amount','discount','cash_back']);
+        $input = $request->only(['invoice_id', 'customer_name', 'customer_phone', 'customer_email', 'customer_address', 'invoice_data', 'total_amount','discount','cash_back']);
 
         $validator = Validator::make($input, [
             "invoice_no" => 'required|unique:invoice',
@@ -53,6 +54,15 @@ class InvoiceController extends Controller
             $response = ApiResponse::BedRequest($validator->errors()->first());
             return response()->json($response['json'], $response['status']);
         }
+
+        $updateItem = new ItemModel;
+
+        foreach($input['invoice_data'] as $item) {
+            $updateItem->where('code', $item['code'])->decrement('qty', $item['qty']);
+        }
+
+        $input['invoice_data'] = json_encode($input['invoice_data']);
+
         
         try{
             $invoice = InvoiceModel::create($input);
