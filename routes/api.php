@@ -116,6 +116,7 @@ Route::group([
         Route::get('/{id}', [ItemController::class, 'detail']);
         Route::delete('/{id}', [ItemController::class, 'delete']);
         Route::post('/delete', [ItemController::class, 'deleteMultiple']);
+        Route::get('/import/price', [ItemController::class, 'importPrice']);
     });
 
     Route::group([

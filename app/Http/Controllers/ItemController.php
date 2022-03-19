@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Validator;
 use App\Models\ItemModel;
+use App\Imports\PriceImport;
 use App\Models\SecondItem;
 use App\Exports\ItemExport;
 use App\Imports\ItemImport;
@@ -13,14 +14,15 @@ use App\Models\CategoryModel;
 use App\HttpResponse\ApiResponse;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Database\QueryException;
-ini_set('max_execution_time', '900');
+
+ini_set('max_execution_time', '900000');
 
 class ItemController extends Controller
 {
 
     public function __construct() {
-       // $this->middleware(['license', 'jwt.verify']);
-
+        $this->middleware('jwt.verify', ['except' => ['importPrice']]);
+        $this->middleware('license', ['except' => ['importPrice']]);
     }
 
     public function index () {
@@ -154,12 +156,58 @@ class ItemController extends Controller
         }
     }
 
-    public function import() 
-    {
-        $path = storage_path('app/lists.xlsx');
-        Excel::import(new ItemImport, $path);
+    public function importPrice() {
+        $PricePath = storage_path('../database/seeders/xlsx/prices.xlsx');
+        $rows = Excel::toArray(new PriceImport, $PricePath);
 
-        return "Sucessfully Imported";
+        $updateList = [];
+        $createItemList = [];
+
+        foreach($rows[0] as $row) {
+            $item = [
+                'code' => $row['material_code'],
+                'price' => $row['price']
+            ];
+
+            $checkItem = ItemModel::where('code', $item['code'])->get()->first();
+
+            if($checkItem) {
+                $updateItem = ItemModel::where('code', $item['code'])->update([
+                    'price' => $item['price'],
+                ]);
+
+                array_push($updateList, $item);
+            } else {
+                $createItem = [
+                    'category_id' => 1, 
+                    'code' => $item['code'], 
+                    'eng_name' => null, 
+                    'mm_name' => null, 
+                    'model' => null, 
+                    'qty' => 0, 
+                    'price' => $item['price'], 
+                    'percentage' => null, 
+                    'location' => null, 
+                    'active' => true
+                ];
+
+                ItemModel::create($createItem);
+                array_push($createItemList, $item);
+            }
+        }
+
+        $response = ApiResponse::Success([
+            "update_price" => [
+                "total" => count($updateList),
+                "data" => $updateList
+            ],
+            "create_items" => [
+                "total" => count($createItemList),
+                "data" => $createItemList
+            ]
+        ], 'Success');
+        return response()->json($response['json'], $response['status']);
+
     }
 
     public function export() 
