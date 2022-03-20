@@ -75,16 +75,15 @@ class CreditController extends Controller
                 return response()->json($response['json'], $response['status']);
             }
 
-            $data = json_encode($credit->repayment);
-
+            $data = json_decode($credit->repayment);
             array_push($data, $input);
 
-            $credit = CreditModel::where('id',$request['id'])->update($)
-        $credit->save();
-       
-        $credit = CreditModel::where('invoice_no',$request['id'])->with(['invoice'])->get();
-        $response = ApiResponse::Success($credit, 'get credit list');
-        return response()->json($response['json'], $response['status']);
+
+            $credit = CreditModel::where('id',$request['id'])->update(['repayment'=> json_encode($data)]);
+            
+            $response = ApiResponse::Success($credit, 'get credit list');
+            return response()->json($response['json'], $response['status']);
+
         }catch (QueryException $e) {
             $response = ApiResponse::Unknown('something was wrong');
             return response()->json($response['json'], $response['status']);
