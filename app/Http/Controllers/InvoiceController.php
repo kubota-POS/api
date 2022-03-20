@@ -91,12 +91,12 @@ class InvoiceController extends Controller
         try{
             $invoice = InvoiceModel::create($input);
 
-            if($input['credit_amount'] > 0) {
+            if((int)$input['credit_amount'] > 0) {
                 $repayments = [];
 
                 array_push($repayments, [
                     'pay_amount' => (float)$input['pay_amount'],
-                    'pay_date' => Carbon::now()->timestamp
+                    'pay_date' => Carbon::now()
                 ]);
 
                 $creditInput = [

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\HttpResponse\ApiResponse;
 use Illuminate\Database\QueryException;
 use Validator;
+use \Carbon\Carbon;
 
 class CreditController extends Controller
 {
@@ -52,27 +53,33 @@ class CreditController extends Controller
     //update Credit by invoice_id
     public function update(Request $request)
     {
-        $input = $request->only(['repayment']);
+        $input = $request->only(['pay_amount']);
 
         $validator = Validator::make($input, [
-            "repayment" => 'required'
+            "pay_amount" => 'required'
         ]);
 
         if($validator->fails()){
             $response = ApiResponse::BedRequest($validator->errors()->first());
             return response()->json($response['json'], $response['status']);
         }
+
+        $input['pay_date'] = Carbon::now();
+        
+
         try{
-        $data = json_encode($request->repayment);
-        $credit = CreditModel::where('invoice_no',$request['id'])->get()->first();
-        if(!$credit){
-            $response = ApiResponse::NotFound('Credit not found');
-            return response()->json($response['json'], $response['status']);
-        }
-        $credit->repayment = $data;
-        $amount = $request->repayment['pay_amount'];
-        $credit->amount = $credit->amount - $amount;
-        $credit->credit_date = $request->repayment['pay_date'];
+            $credit = CreditModel::find($request->id);
+
+            if(!$credit){
+                $response = ApiResponse::NotFound('Credit not found');
+                return response()->json($response['json'], $response['status']);
+            }
+
+            $data = json_encode($credit->repayment);
+
+            array_push($data, $input);
+
+            $credit = CreditModel::where('id',$request['id'])->update($)
         $credit->save();
        
         $credit = CreditModel::where('invoice_no',$request['id'])->with(['invoice'])->get();

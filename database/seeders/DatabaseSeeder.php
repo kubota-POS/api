@@ -30,15 +30,15 @@ class DatabaseSeeder extends Seeder
         
         $this->command->info("Number Specification seeding completed successfully");
 
-        \App\Models\CategoryModel::factory()->create([
-            "name" => "kubota"
-        ]);
+        // \App\Models\CategoryModel::factory()->create([
+        //     "name" => "kubota"
+        // ]);
 
-        $this->command->info("Import item category for kubota seeding completed successfully");
+        // $this->command->info("Import item category for kubota seeding completed successfully");
 
-        $path = storage_path('../database/seeders/xlsx/items.xlsx');
-        Excel::import(new ItemImport, $path);
+        // $path = storage_path('../database/seeders/xlsx/items.xlsx');
+        // Excel::import(new ItemImport, $path);
 
-        $this->command->info("Import item of kubota seeding completed successfully");
+        // $this->command->info("Import item of kubota seeding completed successfully");
     }
 }

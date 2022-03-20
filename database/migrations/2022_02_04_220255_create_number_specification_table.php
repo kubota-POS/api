@@ -15,7 +15,7 @@ class CreateNumberSpecificationTable extends Migration
     {
         Schema::create('number_specification', function (Blueprint $table) {
             $table->id();
-            $table->integer('set_number')->unique();
+            $table->string('set_number')->unique();
             $table->string('set_char')->nullable()->unique();
             $table->timestamps();
         });
