@@ -16,6 +16,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\HistoryLogController;
 use App\Http\Controllers\SecondItemController;
 use App\Http\Controllers\NumberSpecificationController;
+use App\Http\Controllers\BackupController;
 
 /*
 |--------------------------------------------------------------------------
@@ -116,7 +117,7 @@ Route::group([
         Route::get('/{id}', [ItemController::class, 'detail']);
         Route::delete('/{id}', [ItemController::class, 'delete']);
         Route::post('/delete', [ItemController::class, 'deleteMultiple']);
-        Route::get('/import/price', [ItemController::class, 'importPrice']);
+        // Route::get('/import/price', [ItemController::class, 'importPrice']);
     });
 
     Route::group([
@@ -153,7 +154,13 @@ Route::group([
         Route::get('/lastInvoice', [InvoiceController::class,'lastInvoice']);
     });
 
+    Route::group([
+        'prefix' => 'backup'
+    ], function ($router) {
+        Route::get('', [BackupController::class, 'index']);
+    });
 });
+
 Route::get('secondItem',[SecondItemController::class,'index']);
 Route::get('import',[SecondItemController::class,'import']);
 Route::any('{any}', function() {
