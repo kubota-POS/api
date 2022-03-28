@@ -36,7 +36,7 @@ class BackupController extends Controller
             $updateItem['percentage'] = $item['sell_percentage'];
             $updateItem['location'] = $item['location'];
 
-            //$newItem = ItemModel::create($updateItem);
+            $newItem = ItemModel::create($updateItem);
             array_push($itemPush, $newItem);
         }
 

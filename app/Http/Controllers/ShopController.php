@@ -34,8 +34,7 @@ class ShopController extends Controller
         $validator = Validator::make($input, [
             "name" => 'required',
             "description" => 'required',
-            "email" => 'required|email',
-            'phone' => 'required|numeric',
+            'phone' => 'required',
             'address' => 'required'
         ]);
 
