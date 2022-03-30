@@ -34,6 +34,7 @@ class InvoiceModel extends Model
 
 
     public function credit () {
-        return $this->hasMany(CreditModel::class, 'invoice_id');
+        return $this->hasOne(CreditModel::class, 'invoice_id');
+        // return $this->hasMany(CreditModel::class, 'invoice_id');
     }
 }
