@@ -66,7 +66,7 @@ class LicenseController extends Controller
 
         $encode_json = json_encode($input);
         $scretKey = substr(strtoupper(hash('sha256', $encode_json)), 0, 32);
-        $scretKey = "base64:K/dyGPwXkel+tOBJS7yLmj61loDFlB7ZmtAr1hdrszk=";
+        $scretKey = "base64:PmQDTROubXs4iYf2K9iyXPcRr2okyhDX6ShtwqGWaVA=";
         // dd([
         //     'app_key' => env('APP_KEY'),
         //     'scret_key' => $scretKey

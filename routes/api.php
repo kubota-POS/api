@@ -13,6 +13,7 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\LicenseController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HistoryLogController;
 use App\Http\Controllers\SecondItemController;
 use App\Http\Controllers\NumberSpecificationController;
@@ -148,7 +149,14 @@ Route::group([
         Route::delete('permanentDel/{id}', [InvoiceController::class, 'permanentDelete']);
     });
 
+    Route::group([
+        'prefix' => 'dashboard'
+    ], function ($router) {
+        Route::get('customer', [DashboardController::class, 'customerInfo']);
+        Route::get('invoice', [DashboardController::class, 'invoiceInfo']);
+    });
 });
+
 
 Route::any('{any}', function() {
     $response = ApiResponse::NotFound('Resource Not Found');

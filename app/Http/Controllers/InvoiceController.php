@@ -33,11 +33,10 @@ class InvoiceController extends Controller
 //Create Invoice and Credit
     public function create(Request $request)
     {
-        $input = $request->only(['invoice_id', 'customer_name', 'customer_phone', 'customer_email', 'customer_address', 'invoice_data', 'total_amount','discount','cash_back']);
+        $input = $request->only(['invoice_no','invoice_id', 'customer_id', 'pay_amount', 'customer_name', 'customer_phone', 'customer_email', 'customer_address','created_at', 'invoice_data', 'total_amount','discount','cash_back']);
 
         $validator = Validator::make($input, [
             "invoice_no" => 'required|unique:invoice',
-            "customer_id" => 'required',
             "invoice_data" => 'required',
             "total_amount" => 'required',
             "discount" => 'required',
@@ -51,14 +50,14 @@ class InvoiceController extends Controller
         }
 
         $updateItem = new ItemModel;
-
+       
         foreach($input['invoice_data'] as $item) {
             $updateItem->where('code', $item['code'])->decrement('qty', $item['qty']);
         }
 
         $input['invoice_data'] = json_encode($input['invoice_data']);
-
         
+
         try{
             $invoice = InvoiceModel::create($input);
             $credit = new CreditModel;
