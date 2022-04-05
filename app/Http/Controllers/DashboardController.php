@@ -38,9 +38,9 @@ class DashboardController extends Controller
             $totalCustomer=$unknown+$knownCustomer;
         
             $info=[];
-            $info['Unknow Customer']=$unknown;
-            $info['known Customer']=$knownCustomer;
-            $info['Total Customer']=$totalCustomer;
+            $info['unknowCustomer']=$unknown;
+            $info['knownCustomer']=$knownCustomer;
+            $info['totalCustomer']=$totalCustomer;
             $info['credit']=$data;
             
             $response = ApiResponse::Success($info, 'Customer Info with Credit');
@@ -51,7 +51,7 @@ class DashboardController extends Controller
         } 
     }
 
-    public function invoiceInfo()
+    public function InvoiceInfo()
     {
         try {
         $data=[];
@@ -74,7 +74,7 @@ class DashboardController extends Controller
             $today['remaning_balance']=$today['total_credit'];
         }
         $today['total_invoice']=$today_invoice->count();
-        $data['today']=$today;
+        $data['daily']=$today;
         
 
         // Weekly_Invoice_info
@@ -91,7 +91,7 @@ class DashboardController extends Controller
             $week['remaning_balance']=$week['total_credit'];
         }
         $week['total_invoice']=$weekly_invoice->count();
-        $data['week']=$week;
+        $data['weekly']=$week;
 
 
 
@@ -109,7 +109,7 @@ class DashboardController extends Controller
             $month['remaning_balance']=$month['total_credit'];
         }
         $month['total_invoice']=$monthly_invoice->count();
-        $data['month']=$month;
+        $data['monthly']=$month;
 
         $response = ApiResponse::Success($data, 'Invoice Info');
             return response()->json($response['json'], $response['status']);
@@ -117,5 +117,75 @@ class DashboardController extends Controller
             $response = ApiResponse::Unknown('something was wrong');
             return response()->json($response['json'], $response['status']);
         } 
+    }
+
+    public function InvoiceDetail(Request $request)
+    {
+        $data=[];
+        $today_date = Carbon::now();
+        $last_week = Carbon::now()->subDays(7);
+        $last_month = Carbon::now()->subDays(31);
+
+        // Today_Invoice_info
+        if($request['type']=='today'){
+        $today_invoice = InvoiceModel::whereDate('created_at', '=', $today_date)->with(['credit'])->get();
+        
+        $today=[];
+        $today['total_amount']=0;
+        $today['total_credit']=0;
+        $today['total_payamount']=0;
+        $today['remaning_balance']=0;
+        foreach($today_invoice as $e){
+            $today['total_amount']+=$e['total_amount'];
+            $today['total_credit']+=$e['credit']['amount'];
+            $today['total_payamount']+=$e['pay_amount'];
+            $today['remaning_balance']=$today['total_credit'];
+        }
+        $today['total_invoice']=$today_invoice->count();
+        $data['daily_invoice_data']=$today;
+        $response = ApiResponse::Success($data, 'Invoice Info');
+            return response()->json($response['json'], $response['status']);
+        }
+        
+        // Weekly_Invoice_info
+        if($request['type']=='week'){
+        $weekly_invoice = InvoiceModel::whereBetween('created_at', [$last_week, $today_date])->with(['credit'])->get();
+        $week=[];
+        $week['total_amount']=0;
+        $week['total_credit']=0;
+        $week['total_payamount']=0;
+        $week['remaning_balance']=0;
+        foreach($weekly_invoice as $e){
+            $week['total_amount']+=$e['total_amount'];
+            $week['total_credit']+=$e['credit']['amount'];
+            $week['total_payamount']+=$e['pay_amount'];
+            $week['remaning_balance']=$week['total_credit'];
+        }
+        $week['total_invoice']=$weekly_invoice->count();
+        $data['weekly_invoice_data']=$week;
+        $response = ApiResponse::Success($data, 'Invoice Info');
+            return response()->json($response['json'], $response['status']);
+        }
+
+        // Monthly_Invoice_info
+        if($request['type']=='month'){
+            $monthly_invoice = InvoiceModel::whereBetween('created_at', [$last_month, $today_date])->with(['credit'])->get();
+            $month=[];
+            $month['total_amount']=0;
+            $month['total_credit']=0;
+            $month['total_payamount']=0;
+            $month['remaning_balance']=0;
+            foreach($monthly_invoice as $e){
+                $month['total_amount']+=$e['total_amount'];
+                $month['total_credit']+=$e['credit']['amount'];
+                $month['total_payamount']+=$e['pay_amount'];
+                $month['remaning_balance']=$month['total_credit'];
+            }
+            $month['total_invoice']=$monthly_invoice->count();
+            $data['monthly_invoice_data']=$month;
+    
+            $response = ApiResponse::Success($data, 'Invoice Info');
+                return response()->json($response['json'], $response['status']);           
+        }
     }
 }

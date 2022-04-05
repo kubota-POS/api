@@ -153,7 +153,8 @@ Route::group([
         'prefix' => 'dashboard'
     ], function ($router) {
         Route::get('customer', [DashboardController::class, 'customerInfo']);
-        Route::get('invoice', [DashboardController::class, 'invoiceInfo']);
+        Route::get('invoice', [DashboardController::class, 'InvoiceInfo']);
+        Route::get('invoiceDetail', [DashboardController::class, 'InvoiceDetail']);
     });
 });
 
