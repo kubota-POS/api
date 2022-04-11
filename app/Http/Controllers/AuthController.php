@@ -51,7 +51,7 @@ class AuthController extends Controller
         }
         
         if (!$token = auth()->attempt($validator->validated())) {
-            $response = ApiResponse::Unauthorized('Unauthorized');
+            $response = ApiResponse::BedRequest('Username and password does not match');
             return response()->json($response['json'], $response['status']);
         }
 
@@ -247,7 +247,7 @@ class AuthController extends Controller
                 'account' => auth()->user(),
                 'access_token' => $token,
                 'token_type' => 'bearer',
-                'expires_in' => auth()->factory()->getTTL() * 1
+                'expires_in' => auth()->factory()->getTTL() * 1000
             ]
         ]);
     }

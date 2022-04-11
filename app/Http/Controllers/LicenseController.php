@@ -74,7 +74,7 @@ class LicenseController extends Controller
 
         if(env('APP_KEY') !== $scretKey) {
             $response = ApiResponse::BedRequest('Invalid license key');
-            return response()->json($response['json'], $response['status']);
+            return response()->json($response['jsosn'], $response['status']);
         }
 
         $json_string = json_encode($input);
