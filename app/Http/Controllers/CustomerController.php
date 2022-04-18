@@ -21,28 +21,7 @@ class CustomerController extends Controller
 
             $customer = CustomerModel::get();
             $response = ApiResponse::Success($customer, 'get customer list');
-
-            // $customers = InvoiceModel::with(['credit'])->get();
-
-            // $customerList = [];
-            // $unknownCustomerList = [];
-
-            // foreach($customers as $customer) {
-            //     if($customer['customer_name'] !== null) {
-            //         array_push($customerList, $customer);
-            //     } else {
-            //         array_push($unknownCustomerList, $customer);
-            //     }
-            // }
-
-            // $responseData = [
-            //     "customers" => $customerList,
-            //     "total_customer" => count($customerList),
-            //     "unknown_customers" => $unknownCustomerList,
-            //     "total_unknown_customers" => count($unknownCustomerList)
-            // ];
-
-            // $response = ApiResponse::Success($responseData, 'get customer list');
+            
             return response()->json($response['json'], $response['status']);
         } catch (QueryException $e) {
             $response = ApiResponse::Unknown('something was wrong');
