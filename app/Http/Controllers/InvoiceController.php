@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Validator;
 use App\Models\CreditModel;
+use App\Models\CustomerModel;
 use App\Models\InvoiceModel;
 use App\Models\ItemModel;
 use Illuminate\Http\Request;
@@ -18,19 +19,20 @@ class InvoiceController extends Controller
     public function __construct() {
         $this->middleware(['license', 'jwt.verify']);
     }
-// list of invoice does not include deleted invoice
+
+    // list of invoice does not include deleted invoice
     public function index()
     {
         try {
-            $invoice = InvoiceModel::get()->first();
-            
+            $invoice = InvoiceModel::with(['customer','credit'])->get();
+
             if(!$invoice){
                 $response = ApiResponse::Success([], 'No invoice data');
                 return response()->json($response['json'], $response['status']);
             }
-
-            $invoice = InvoiceModel::with(['credit'])->get();
+            
             $response = ApiResponse::Success($invoice, 'get invoice list');
+
             return response()->json($response['json'], $response['status']);
         } catch (QueryException $e) {
             $response = ApiResponse::Unknown('something was wrong');
@@ -56,7 +58,7 @@ class InvoiceController extends Controller
     {
         $input = $request->only([
             'invoice_no', 
-            'customer_name', 'customer_phone', 'customer_email', 'customer_address', 
+            'customer_id',
             'invoice_data', 
             'total_amount',
             'discount', 
@@ -81,12 +83,18 @@ class InvoiceController extends Controller
         $updateItem = new ItemModel;
 
         foreach($input['invoice_data'] as $item) {
-            $updateItem->where('code', $item['code'])->decrement('qty', $item['requestQty']);
+            $updateItem->where('id', $item['id'])->decrement('qty', $item['requestQty']);
         }
 
         $invoiceData = $input['invoice_data'];
 
         $input['invoice_data'] = json_encode($input['invoice_data']);
+
+        if(isset($input['customer_id'])) {
+            $customer = CustomerModel::find($input['customer_id']) || null;
+        } else {
+            $customer = null;
+        }
 
         try{
             $invoice = InvoiceModel::create($input);
@@ -107,26 +115,31 @@ class InvoiceController extends Controller
                 ];
 
                 $credit = CreditModel::create($creditInput);
+
                 $response = ApiResponse::Success([
                     "invoice" => $invoice,
-                    "credit" => $credit
+                    "credit" => $credit,
+                    "customer" => $customer
                 ], 'invoice created');
+
                 return response()->json($response['json'], $response['status']);
             }
 
             $response = ApiResponse::Success([
                 "invoice" => $invoice,
-                "credit" => null
+                "credit" => null,
+                "customer" => $customer
             ], 'invoice created');
+
             return response()->json($response['json'], $response['status']);
             
         } catch (QueryException $e){
-            dd($e);
             $response = ApiResponse::Unknown('unknown error');
             return response()->json($response['json'], $response['status']); 
         }
     }
-//softDelete
+    
+    //softDelete
     public function delete(Request $request)
     {
         $id = $request->id;

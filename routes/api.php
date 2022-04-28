@@ -143,10 +143,9 @@ Route::group([
         'prefix' => 'invoice'
     ], function ($router) {
         Route::get('', [InvoiceController::class, 'index']);
+        Route::post('', [InvoiceController::class, 'create']);
         Route::get('/export', [InvoiceController::class, 'export']);
         Route::get('byDate', [InvoiceController::class, 'listByDate']);
-        Route::post('', [InvoiceController::class, 'create']);
-        Route::post('store', [InvoiceController::class, 'test']);
         Route::delete('/{id}', [InvoiceController::class, 'delete']);
         Route::get('restore', [InvoiceController::class, 'restore']);
         Route::get('deleted', [InvoiceController::class, 'deletedList']);

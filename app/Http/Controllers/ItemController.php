@@ -41,8 +41,7 @@ class ItemController extends Controller
 
         $validator = Validator::make($input, [
             "eng_name" => "required",
-            "code" => "required|unique:items",
-            "model" => "required"
+            "code" => "required|unique:items"
         ]);
 
         if ($validator->fails()) {
@@ -51,7 +50,6 @@ class ItemController extends Controller
         }
 
          try {
-            
              $newItem = ItemModel::create($input);
              $response = ApiResponse::Success($newItem, 'new item is created');
              return response()->json($response['json'], $response['status']);
