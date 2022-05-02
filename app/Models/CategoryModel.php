@@ -20,7 +20,7 @@ class CategoryModel extends Model
         'created_at', 'updated_at'
     ];
 
-    public function items () {
+    public function item () {
         return $this->hasMany(ItemModel::class, 'category_id');
     }
 }

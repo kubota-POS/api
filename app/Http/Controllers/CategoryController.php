@@ -25,6 +25,22 @@ class CategoryController extends Controller
         }
     }
 
+    public function withItem (Request $request) {
+        if((boolean)$request['status'] === true) {
+            try {
+                $categories = CategoryModel::with(['item'])->get();
+                $response = ApiResponse::Success($categories, 'get categories list with items');
+                return response()->json($response['json'], $response['status']);
+            } catch (QueryException $e) {
+                $response = ApiResponse::Unknown('someting was wrong');
+                return response()->json($response['json'], $response['status']);
+            }
+        }  else {
+            $response = ApiResponse::BedRequest('invalid item status');
+            return response()->json($response['json'], $response['status']);
+        }
+    }
+
     public function create (Request $request) {
         $input = $request->only(['name', 'description']);
 

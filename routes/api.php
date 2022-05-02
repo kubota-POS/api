@@ -87,11 +87,12 @@ Route::group([
         'prefix' => 'category'
     ], function ($router) {
         Route::get('', [CategoryController::class, 'index']);
-        Route::get('/{id}', [CategoryController::class, 'category']);
         Route::post('', [CategoryController::class, 'create']);
+        Route::delete('', [CategoryController::class, 'deleteMultiple']);
+        Route::get('/{id}', [CategoryController::class, 'category']);
         Route::put('/{id}', [CategoryController::class, 'update']);
         Route::delete('/{id}', [CategoryController::class, 'delete']);
-        Route::delete('', [CategoryController::class, 'deleteMultiple']);
+        Route::get('/item/{status}', [CategoryController::class, 'withItem']);
     });
 
     Route::group([
