@@ -16,6 +16,7 @@ class CreateCreditTable extends Migration
         Schema::create('credit', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('invoice_id')->unique();
+            $table->unsignedBigInteger('customer_id')->nullable();
             $table->string('invoice_no')->unique();
             $table->integer('amount')->nullable();
             $table->longtext('repayment')->nullable();

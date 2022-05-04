@@ -19,7 +19,7 @@ class CustomerController extends Controller
     {
         try {
 
-            $customer = CustomerModel::get();
+            $customer = CustomerModel::with(['invoice', 'credit'])->get();
             $response = ApiResponse::Success($customer, 'get customer list');
             
             return response()->json($response['json'], $response['status']);
