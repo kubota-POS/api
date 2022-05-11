@@ -51,11 +51,12 @@ class AuthController extends Controller
         }
         
         if (!$token = auth()->attempt($validator->validated())) {
-            $response = ApiResponse::Unauthorized('Unauthorized');
+            $response = ApiResponse::BedRequest('Incorrect username and password');
             return response()->json($response['json'], $response['status']);
         }
 
         $user = auth()->user();
+
         if($user['active'] === false) {
             $response = ApiResponse::Unprocess('Account is not active');
             return response()->json($response['json'], $response['status']);
