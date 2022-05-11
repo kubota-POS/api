@@ -197,6 +197,7 @@ class AuthController extends Controller
             $response = ApiResponse::NotFound('user is not found');
             return response()->json($response['json'], $response['status']);
         }
+
         $name = $user->only(['name']);
         $input = $request->only(['password']);
         $check = array_merge($input,$name);
@@ -212,7 +213,7 @@ class AuthController extends Controller
         }
         
         if (!$token = auth()->attempt($validator->validated())) {
-            $response = ApiResponse::Unauthorized('Unauthorized');
+            $response = ApiResponse::BedRequest('current password does not match');
             return response()->json($response['json'], $response['status']);
         }
 
@@ -221,10 +222,12 @@ class AuthController extends Controller
             $validator = Validator::make($input, [
                 'newPassword' => 'required|string|min:6',
             ]);
+
             if ($validator->fails()) {
                 $response = ApiResponse::BedRequest($validator->errors()->first());
                 return response()->json($response['json'], $response['status']);
             }
+
             $newpsw = new User();
             $newpsw->password=bcrypt($input['newPassword']);
             $user = User::find($request->id);
