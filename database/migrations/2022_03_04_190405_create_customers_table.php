@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateNumberSpecificationTable extends Migration
+class CreateCustomersTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,12 @@ class CreateNumberSpecificationTable extends Migration
      */
     public function up()
     {
-        Schema::create('number_specification', function (Blueprint $table) {
+        Schema::create('customers', function (Blueprint $table) {
             $table->id();
-            $table->string('set_number')->unique();
-            $table->string('set_char')->nullable()->unique();
+            $table->string('name');
+            $table->string('email')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('address')->nullable();
             $table->timestamps();
         });
     }
@@ -28,6 +30,6 @@ class CreateNumberSpecificationTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('number_specification');
+        Schema::dropIfExists('customers');
     }
 }

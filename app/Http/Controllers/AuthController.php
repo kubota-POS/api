@@ -12,6 +12,7 @@ use JWTAuth;
 use App\HttpResponse\ApiResponse;
 use Illuminate\Database\QueryException;
 use Exception;
+use Hash;
 
 use App\Models\User;
 
@@ -20,8 +21,8 @@ class AuthController extends Controller
 
     public function __construct() {
         $this->middleware('jwt.verify', ['except' => ['login', 'register', 'check']]);
-        $this->middleware('license');
-        $this->middleware('device');
+        $this->middleware('license', ['except' => ['check']]);
+        // $this->middleware('device');
     }
 
     public function index() {
@@ -48,9 +49,9 @@ class AuthController extends Controller
             $response = ApiResponse::BedRequest($validator->errors()->first());
             return response()->json($response['json'], $response['status']);
         }
-
+        
         if (!$token = auth()->attempt($validator->validated())) {
-            $response = ApiResponse::Unauthorized('Unauthorized');
+            $response = ApiResponse::BedRequest('Incorrect username and password');
             return response()->json($response['json'], $response['status']);
         }
 
@@ -152,50 +153,94 @@ class AuthController extends Controller
         }
     }
 
-    public function update(Request $request) {
-        $input = $request->only(['email', 'phone', 'password', 'active']);
-        $requestUpdate = [];
+    public function update(Request $request) 
+    {
+        $input = $request->only(['name', 'phone', 'email', 'active']);
+            try {
+                $user = User::find($request->id);
+    
+                if(!$user){
+                    $response = ApiResponse::NotFound('User is not found');
+                    return response()->json($response['json'], $response['status']);
+                }
+
+                
+               
+                $validator = Validator::make($input, [
+                     'name' => 'unique:users',
+                     'email' => 'unique:users',
+                     'phone' => 'unique:users'
+                 ]);
+        
+                if($validator->fails()){
+                    $response = ApiResponse::BedRequest($validator->errors()->first());
+                    return response()->json($response['json'], $response['status']);
+                }
+    
+                $update = User::where('id', '=', $request->id)->update($input);
+                $user->refresh();
+                $response = ApiResponse::Success($user, 'user is updated');
+                return response()->json($response['json'], $response['status']); 
+    
+            } catch(QueryException $e) {
+                $response = ApiResponse::Unknown('unknown error');
+                return response()->json($response['json'], $response['status']); 
+            } 
+        
+    }
+
+    public function passwordUpdate(Request $request)
+    {   
+        $user = User::find($request->id);
+
+        if(!$user) {
+            $response = ApiResponse::NotFound('user is not found');
+            return response()->json($response['json'], $response['status']);
+        }
+
+        $name = $user->only(['name']);
+        $input = $request->only(['password']);
+        $check = array_merge($input,$name);
+
+    	$validator = Validator::make($check, [
+            'name' => 'required',
+            'password' => 'required|string|min:6',
+        ]);
+
+        if ($validator->fails()) {
+            $response = ApiResponse::BedRequest($validator->errors()->first());
+            return response()->json($response['json'], $response['status']);
+        }
+        
+        if (!$token = auth()->attempt($validator->validated())) {
+            $response = ApiResponse::BedRequest('current password does not match');
+            return response()->json($response['json'], $response['status']);
+        }
 
         try {
-            $user = User::find($request->id);
-
-            if(isset($input['email']) && $input['email'] !== $user->email) {
-                $requestUpdate['email'] = $input['email'];
-            }
-    
-            if(isset($input['phone']) && $input['phone'] !== $user->phone) {
-                $requestUpdate['phone'] = $input['phone'];
-            }
-    
-            if(isset($input['password'])) {
-                $requestUpdate['password'] =  bcrypt($input['password']);
-            }
-    
-            if(isset($input['active'])) {
-                $requestUpdate['active'] = $input['active'];
-            }
-
-            $validator = Validator::make($requestUpdate, [
-                'name' => 'unique:users',
-                'email' => 'unique:users',
-                'phone' => 'unique:users',
-                'password' => 'min:6',
+            $input = $request->only(['newPassword']);
+            $validator = Validator::make($input, [
+                'newPassword' => 'required|string|min:6',
             ]);
-    
-            if($validator->fails()){
+
+            if ($validator->fails()) {
                 $response = ApiResponse::BedRequest($validator->errors()->first());
                 return response()->json($response['json'], $response['status']);
             }
 
-            $updated = User::where('id', '=', $request->id)->update($requestUpdate);
-
-            $response = ApiResponse::Success([], 'user is updated');
-            return response()->json($response['json'], $response['status']); 
-
-        } catch(QueryException $e) {
+            $newpsw = new User();
+            $newpsw->password=bcrypt($input['newPassword']);
+            $user = User::find($request->id);
+            $user->password=$newpsw->password;
+            $user->save();
+            $user->refresh();
+            $response = ApiResponse::Success($user, 'user password is updated');
+        return response()->json($response['json'], $response['status']);   
+        } catch (QueryException $e) {
             $response = ApiResponse::Unknown('unknown error');
-            return response()->json($response['json'], $response['status']); 
-        }
+            return response()->json($response['json'], $response['status']);
+        } 
+
     }
 
     protected function createNewToken($token){
@@ -206,7 +251,7 @@ class AuthController extends Controller
                 'account' => auth()->user(),
                 'access_token' => $token,
                 'token_type' => 'bearer',
-                'expires_in' => auth()->factory()->getTTL() * 60
+                'expires_in' => auth()->factory()->getTTL() * 1
             ]
         ]);
     }
