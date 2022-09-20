@@ -7,65 +7,63 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use \Carbon\Carbon;
-use Validator;
 use JWTAuth;
-use App\HttpResponse\ApiResponse;
 use Illuminate\Database\QueryException;
 use Exception;
 use Hash;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->middleware('jwt.verify', ['except' => ['login', 'register', 'check']]);
         $this->middleware('license', ['except' => ['check']]);
         // $this->middleware('device');
     }
 
-    public function index() {
+    public function index(Request $request)
+    {
+        $pageSize = $request->pageSize ? $request->pageSize : 10;
         try {
-            $users = User::all();
-            $response = ApiResponse::Success($users, 'get user lists');
-            return response()->json($response['json'], $response['status']);
-            
+            $users = User::orderBy('created_at', 'desc')->paginate($pageSize);
+            return $this->success($users, 'get user lists');
         } catch (QueryException $e) {
-            $response = ApiResponse::Unknown('unknown error');
-            return response()->json($response['json'], $response['status']);
+            return $this->unknown();
         }
     }
 
-    public function login(Request $request){
+    public function login(Request $request)
+    {
         $input = $request->only(['name', 'password']);
 
-    	$validator = Validator::make($input, [
+        $validator = Validator::make($input, [
             'name' => 'required',
             'password' => 'required|string|min:6',
         ]);
 
         if ($validator->fails()) {
-            $response = ApiResponse::BedRequest($validator->errors()->first());
-            return response()->json($response['json'], $response['status']);
+            return $this->unprocess($validator->errors()->first());
         }
-        
+
         if (!$token = auth()->attempt($validator->validated())) {
-            $response = ApiResponse::BedRequest('Incorrect username and password');
-            return response()->json($response['json'], $response['status']);
+            return $this->unprocess('Incorrect username and password');
         }
 
         $user = auth()->user();
 
-        if($user['active'] === false) {
-            $response = ApiResponse::Unprocess('Account is not active');
-            return response()->json($response['json'], $response['status']);
+        if ($user['active'] === false) {
+            return $this->unprocess('Account is not active');
         }
 
         return $this->createNewToken($token);
     }
 
-    public function register(Request $request) {
+    public function register(Request $request)
+    {
         $input = $request->only(['name', 'email', 'phone', 'password']);
 
         $validator = Validator::make($input, [
@@ -75,9 +73,8 @@ class AuthController extends Controller
             'password' => 'required|string|min:6',
         ]);
 
-        if($validator->fails()){
-            $response = ApiResponse::BedRequest($validator->errors()->first());
-            return response()->json($response['json'], $response['status']);
+        if ($validator->fails()) {
+            return $this->unprocess($validator->errors()->first());
         }
 
         $input['active'] = true;
@@ -85,136 +82,117 @@ class AuthController extends Controller
 
         try {
             $user = User::create($input);
-
-            $response = ApiResponse::Created(['user' => $user], 'login user information');
-            return response()->json($response['json'], $response['status']);
-
-        } catch(QueryException $e) {
-            $response = ApiResponse::Unknown('unknown error');
-            return response()->json($response['json'], $response['status']);
+            return $this->success($user, 'login user information', 201);
+        } catch (QueryException $e) {
+            return $this->unknown();
         }
     }
 
-    public function logout() {
+    public function logout()
+    {
         auth()->logout();
-        $response = ApiResponse::Success([], 'user successfully signed out');
-        return response()->json($response['json'], $response['status']);
+        return $this->success([], 'user successfully signed out');
     }
 
-    public function refresh() {
+    public function refresh()
+    {
         return $this->createNewToken(auth()->refresh());
     }
 
 
-    public function userProfile(Request $request) {
+    public function userProfile(Request $request)
+    {
         $user = auth()->user();
-        $response = ApiResponse::Success($user, 'login user information');
-        return response()->json($response['json'], $response['status']);
+        return $this->success([], 'login user information');
     }
 
-    public function check() {
+    public function check()
+    {
         $user = User::all()->first();
 
-        if(!$user) {
-            $response = ApiResponse::NotFound('user not found');
-            return response()->json($response['json'], $response['status']);
+        if (!$user) {
+            return $this->notFound('user not found');
         }
 
-        $response = ApiResponse::Success(['user' => $user], 'first user account');
-        return response()->json($response['json'], $response['status']);
+        return $this->success($user, 'first user account');
     }
 
-    public function delete(Request $request) {
+    public function delete(Request $request)
+    {
         try {
 
             $loggedUser = Auth::user();
 
             $targetUser = User::find($request->id);
 
-            if(!$targetUser) {
-                $response = ApiResponse::NotFound('user is not found');
-                return response()->json($response['json'], $response['status']);
+            if (!$targetUser) {
+                return $this->notFound('user is not found');
             }
 
-            if((int) $request->id === (int) $loggedUser->id) {
-                $response = ApiResponse::BedRequest('user is logged in');
-                return response()->json($response['json'], $response['status']);
+            if ((int) $request->id === (int) $loggedUser->id) {
+                return $this->unprocess('user is logged in');
             }
 
             $deleted = User::where('id', $request->id)->delete();
-            if($deleted) {
-                $response = ApiResponse::Success([],'user is deleted');
-                return response()->json($response['json'], $response['status']);
+            if ($deleted) {
+                return $this->success([], 'user is deleted');
             }
-
         } catch (QueryException $e) {
-            $response = ApiResponse::Unknown('unknown error');
-            return response()->json($response['json'], $response['status']);
+            return $this->unknown();
         }
     }
 
-    public function update(Request $request) 
+    public function update(Request $request)
     {
         $input = $request->only(['name', 'phone', 'email', 'active']);
-            try {
-                $user = User::find($request->id);
-    
-                if(!$user){
-                    $response = ApiResponse::NotFound('User is not found');
-                    return response()->json($response['json'], $response['status']);
-                }
+        try {
+            $user = User::find($request->id);
 
-                
-               
-                $validator = Validator::make($input, [
-                     'name' => 'unique:users',
-                     'email' => 'unique:users',
-                     'phone' => 'unique:users'
-                 ]);
-        
-                if($validator->fails()){
-                    $response = ApiResponse::BedRequest($validator->errors()->first());
-                    return response()->json($response['json'], $response['status']);
-                }
-    
-                $update = User::where('id', '=', $request->id)->update($input);
-                $user->refresh();
-                $response = ApiResponse::Success($user, 'user is updated');
-                return response()->json($response['json'], $response['status']); 
-    
-            } catch(QueryException $e) {
-                $response = ApiResponse::Unknown('unknown error');
-                return response()->json($response['json'], $response['status']); 
-            } 
-        
+            if (!$user) {
+                return $this->notFound('User is not found');
+            }
+
+            $validator = Validator::make($input, [
+                'name' => 'unique:users',
+                'email' => 'unique:users',
+                'phone' => 'unique:users'
+            ]);
+
+            if ($validator->fails()) {
+                return $this->unprocess($validator->errors()->first());
+            }
+
+            $update = User::where('id', '=', $request->id)->update($input);
+            $user->refresh();
+            return $this->success($user, 'user is updated', 201);
+        } catch (QueryException $e) {
+            return $this->unknown();
+        }
     }
 
     public function passwordUpdate(Request $request)
-    {   
+    {
         $user = User::find($request->id);
 
-        if(!$user) {
-            $response = ApiResponse::NotFound('user is not found');
-            return response()->json($response['json'], $response['status']);
+        if (!$user) {
+            return $this->notFound('user is not found');
         }
 
         $name = $user->only(['name']);
         $input = $request->only(['password']);
-        $check = array_merge($input,$name);
+        $check = array_merge($input, $name);
 
-    	$validator = Validator::make($check, [
+        $validator = Validator::make($check, [
             'name' => 'required',
             'password' => 'required|string|min:6',
         ]);
 
         if ($validator->fails()) {
-            $response = ApiResponse::BedRequest($validator->errors()->first());
-            return response()->json($response['json'], $response['status']);
+            return $this->unprocess($validator->errors()->first());
         }
-        
+
         if (!$token = auth()->attempt($validator->validated())) {
-            $response = ApiResponse::BedRequest('current password does not match');
-            return response()->json($response['json'], $response['status']);
+            return $this->unprocess('current password does not match');
         }
 
         try {
@@ -224,26 +202,23 @@ class AuthController extends Controller
             ]);
 
             if ($validator->fails()) {
-                $response = ApiResponse::BedRequest($validator->errors()->first());
-                return response()->json($response['json'], $response['status']);
+                return $this->unprocess($validator->errors()->first());
             }
 
             $newpsw = new User();
-            $newpsw->password=bcrypt($input['newPassword']);
+            $newpsw->password = bcrypt($input['newPassword']);
             $user = User::find($request->id);
-            $user->password=$newpsw->password;
+            $user->password = $newpsw->password;
             $user->save();
             $user->refresh();
-            $response = ApiResponse::Success($user, 'user password is updated');
-        return response()->json($response['json'], $response['status']);   
+            return $this->success($user, 'user password is updated', 201);
         } catch (QueryException $e) {
-            $response = ApiResponse::Unknown('unknown error');
-            return response()->json($response['json'], $response['status']);
-        } 
-
+            return $this->unknown();
+        }
     }
 
-    protected function createNewToken($token){
+    protected function createNewToken($token)
+    {
         return response()->json([
             'success' => true,
             'message' => 'login success',
@@ -255,5 +230,4 @@ class AuthController extends Controller
             ]
         ]);
     }
-
 }

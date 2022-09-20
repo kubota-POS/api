@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Validator;
 use App\Models\CategoryModel;
 use App\HttpResponse\ApiResponse;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Validator;
 
 class CategoryController extends Controller
 {
@@ -14,14 +14,13 @@ class CategoryController extends Controller
         $this->middleware(['license', 'jwt.verify']);
     }
 
-    public function index () {
+    public function index (Request $request) {
+        $pageSize = $request->pageSize ? $request->pageSize : 50;
         try {
-            $categories = CategoryModel::get();
-            $response = ApiResponse::Success($categories, 'get categories list');
-            return response()->json($response['json'], $response['status']);
+            $categories = CategoryModel::orderBy('created_at', 'desc')->paginate($pageSize);
+            return $this->success($categories , 'Categories List' , 200);
         } catch (QueryException $e) {
-            $response = ApiResponse::Unknown('someting was wrong');
-            return response()->json($response['json'], $response['status']);
+            return $this->unknown();
         }
     }
 
@@ -30,7 +29,7 @@ class CategoryController extends Controller
             try {
                 $categories = CategoryModel::with(['item'])->get();
                 $response = ApiResponse::Success($categories, 'get categories list with items');
-                return response()->json($response['json'], $response['status']);
+                return $this->success($categories , 'get categories list with items' , 200);
             } catch (QueryException $e) {
                 $response = ApiResponse::Unknown('someting was wrong');
                 return response()->json($response['json'], $response['status']);

@@ -4,43 +4,47 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-use Validator;
+
 use \Carbon\Carbon;
 use App\Models\LicenseModel;
 use App\Validations\LicenseValidator;
 use App\HttpResponse\ApiResponse;
+use Exception;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Contracts\Encryption\EncryptException;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Validator;
 
 class LicenseController extends Controller
 {
-    public function __construct() {
+    public function __construct()
+    {
         $this->middleware('license', ['except' => ['checkLicense', 'activate', 'saveToken']]);
         $this->middleware('jwt.verify', ['except' => ['checkLicense', 'activate', 'saveToken']]);
         // $this->middleware('device', ['except' => ['checkLicense', 'activate', 'saveToken']]);
     }
 
     /**
-    *   Check license exit or not
-    */
-    public function checkLicense() {
+     *   Check license exit or not
+     */
+    public function checkLicense()
+    {
         try {
             $license = LicenseModel::get()->first();
             $check = LicenseValidator::check($license);
             return response()->json($check['json'], $check['status']);
-        } catch(QueryException $e) {
-            $response = ApiResponse::Unknown('someting was wrong');
-            return response()->json($response['json'], $response['status']);
+        } catch (QueryException $e) {
+            return $this->unknown();
         }
     }
 
     /**
-    *   Generate license token 
-    */
-    public function activate(Request $request) {
+     *   Generate license token 
+     */
+    public function activate(Request $request)
+    {
         $input = $request->only([
-            'serial_key', 'first_name', 'last_name', 'email', 'phone', 'address', 'num_device', 'duration', 'activation_date' 
+            'serial_key', 'first_name', 'last_name', 'email', 'phone', 'address', 'num_device', 'duration', 'activation_date'
         ]);
 
         $validator = Validator::make($input, [
@@ -56,8 +60,7 @@ class LicenseController extends Controller
         ]);
 
         if ($validator->fails()) {
-            $response = ApiResponse::BedRequest($validator->errors()->first());
-            return response()->json($response['json'], $response['status']);
+            return $this->unprocess($validator->errors()->first());
         }
 
         $expired_date = new Carbon($input['activation_date']);
@@ -72,9 +75,8 @@ class LicenseController extends Controller
         //     'scret_key' => $scretKey
         // ]);
 
-        if(env('APP_KEY') !== $scretKey) {
-            $response = ApiResponse::BedRequest('Invalid license key');
-            return response()->json($response['json'], $response['status']);
+        if (env('APP_KEY') !== $scretKey) {
+            return $this->unprocess('Invalid license key');
         }
 
         $json_string = json_encode($input);
@@ -83,16 +85,14 @@ class LicenseController extends Controller
             $input['license_token'] = Crypt::encrypt($json_string);
             $input['secret_key'] = $scretKey;
 
-            $response = ApiResponse::Success($input, 'license is available');
-            return response()->json($response['json'], $response['status']);
-            
-        } catch(EncryptException $e) {
-            $response = ApiResponse::Unknown('license encrypt error');
-            return response()->json($response['json'], $response['status']);
+            return $this->success($input, 'license is available', 201);
+        } catch (EncryptException $e) {
+            return $this->unknown();
         }
     }
 
-    public function saveToken(Request $request) {
+    public function saveToken(Request $request)
+    {
         $input = $request->only(['serial', 'token']);
 
         $validator = Validator::make($input, [
@@ -101,35 +101,32 @@ class LicenseController extends Controller
         ]);
 
         if ($validator->fails()) {
-            $response = ApiResponse::BedRequest($validator->errors()->first());
-            return response()->json($response['json'], $response['status']);
+            return $this->unprocess($validator->errors()->first());
         }
 
         $licnese = LicenseModel::get()->first();
 
-        if($licnese) {
-            $response = ApiResponse::BedRequest('license key is already exist');
-            return response()->json($response['json'], $response['status']); 
+        if ($licnese) {
+            return $this->unprocess('license key is already exist');
         }
 
         try {
             $store = LicenseModel::create($input);
-            $response = ApiResponse::Success($input, 'license is created');
-            return response()->json($response['json'], $response['status']);
-        } catch(QueryException $e) {
-            $response = ApiResponse::Unknown('someting was wrong');
-            return response()->json($response['json'], $response['status']);
+            return $this->success($input, 'license is created', 201);
+        } catch (QueryException $e) {
+            return $this->unknown();
         }
     }
 
-    public function device(Request $request) {
+    public function device(Request $request)
+    {
         $license = $request->header('license');
 
         try {
             $decryptLicense = Crypt::decrypt($license);
             $licenseObject = json_decode($decryptLicense);
 
-            if($licenseObject->active === false) {
+            if ($licenseObject->active === false) {
                 throw new Exception('License Not Active');
                 return;
             }
@@ -137,15 +134,13 @@ class LicenseController extends Controller
             $current = Carbon::now()->timestamp;
             $expired = Carbon::create($licenseObject->expired_date)->timestamp;
 
-            if($expired < $current) {
+            if ($expired < $current) {
                 throw new Exception('Licnese Expired');
                 return;
             }
 
-            $response = ApiResponse::Success($licenseObject,'get license info');
-            return response()->json($response['json'], $response['status']);
-
-        } catch(Exception $e) {
+            return $this->success($licenseObject, 'get license info', 200);
+        } catch (Exception $e) {
             throw new Exception('Invalid License');
         }
     }
