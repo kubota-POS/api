@@ -12,7 +12,7 @@ use Illuminate\Database\QueryException;
 class ShopController extends Controller
 {
     public function __construct() {
-        $this->middleware(['license', 'jwt.verify', 'device']);
+        $this->middleware(['license', 'jwt.verify']);
     }
 
     public function index() {
@@ -34,8 +34,7 @@ class ShopController extends Controller
         $validator = Validator::make($input, [
             "name" => 'required',
             "description" => 'required',
-            "email" => 'required|email',
-            'phone' => 'required|numeric',
+            'phone' => 'required',
             'address' => 'required'
         ]);
 

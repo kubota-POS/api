@@ -3,30 +3,45 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Validator;
 use App\Models\CategoryModel;
 use App\HttpResponse\ApiResponse;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Validator;
 
 class CategoryController extends Controller
 {
-    public function __construct() {
+    public function __construct()
+    {
         $this->middleware(['license', 'jwt.verify']);
     }
 
-    public function index () {
+    public function index(Request $request)
+    {
+        $pageSize = $request->pageSize ? $request->pageSize : 50;
         try {
-            $categories = CategoryModel::with(['items'])->get();
-            $response = ApiResponse::Success($categories, 'get categories list');
-            return response()->json($response['json'], $response['status']);
+            $categories = CategoryModel::orderBy('created_at', 'desc')->paginate($pageSize);
+            return $this->success($categories, 'Categories List', 200);
         } catch (QueryException $e) {
-            dd($e);
-            $response = ApiResponse::Unknown('someting was wrong');
-            return response()->json($response['json'], $response['status']);
+            return $this->unknown();
         }
     }
 
-    public function create (Request $request) {
+    public function withItem(Request $request)
+    {
+        if ((bool)$request['status'] === true) {
+            try {
+                $categories = CategoryModel::with(['item'])->get();
+                return $this->success($categories, 'get categories list with items', 200);
+            } catch (QueryException $e) {
+                return $this->unknown();
+            }
+        } else {
+            return $this->unprocess('invalid item status');
+        }
+    }
+
+    public function create(Request $request)
+    {
         $input = $request->only(['name', 'description']);
 
         $validator = Validator::make($input, [
@@ -34,21 +49,19 @@ class CategoryController extends Controller
         ]);
 
         if ($validator->fails()) {
-            $response = ApiResponse::BedRequest($validator->errors()->first());
-            return response()->json($response['json'], $response['status']);
+            return $this->unprocess($validator->errors()->first());
         }
 
         try {
             $newCategory = CategoryModel::create($input);
-            $response = ApiResponse::Success($newCategory, 'get categories list');
-            return response()->json($response['json'], $response['status']);
+            return $this->success($newCategory, 'get categories list', 201);
         } catch (QueryException $e) {
-            $response = ApiResponse::Unknown('someting was wrong');
-            return response()->json($response['json'], $response['status']);
+            return $this->unknown();
         }
     }
 
-    public function update (Request $request) {
+    public function update(Request $request)
+    {
         $id = $request->id;
         $input = $request->only(['name', 'description']);
 
@@ -57,65 +70,79 @@ class CategoryController extends Controller
         ]);
 
         if ($validator->fails()) {
-            $response = ApiResponse::BedRequest($validator->errors()->first());
-            return response()->json($response['json'], $response['status']);
+            return $this->unprocess($validator->errors()->first());
         }
 
 
         try {
             $category = CategoryModel::find($id);
 
-            if(!$category) {
-                $response = ApiResponse::NotFound('category is not found');
-                return response()->json($response['json'], $response['status']);
+            if (!$category) {
+                return $this->notFound('category is not found');
             }
 
             $affectedRows = CategoryModel::where('id', '=', $id)->update($input);
             $category->refresh();
-            $response = ApiResponse::Success($category, 'get categories list');
-            return response()->json($response['json'], $response['status']);
+            return $this->success($category, 'get categories list', 201);
         } catch (QueryException $e) {
-            $response = ApiResponse::Unknown('someting was wrong');
-            return response()->json($response['json'], $response['status']);
+            return $this->unknown();
         }
     }
 
-    public function delete (Request $request) {
+    public function delete(Request $request)
+    {
         $id = $request->id;
 
         try {
             $category = CategoryModel::find($id);
 
-            if(!$category) {
-                $response = ApiResponse::NotFound('category is not found');
-                return response()->json($response['json'], $response['status']);
+            if (!$category) {
+                return $this->notFound('category is not found');
             }
 
             $category->delete();
-            $response = ApiResponse::Success($category, 'category is deleted');
-            return response()->json($response['json'], $response['status']);
+            return $this->success($category, 'category is deleted');
         } catch (QueryException $e) {
-            $response = ApiResponse::Unknown('someting was wrong');
-            return response()->json($response['json'], $response['status']);
+            return $this->unknown();
         }
     }
 
-    public function category (Request $request) {
+    public function deleteMultiple(Request $request)
+    {
+        $ids = $request->data;
+        $input = $request->only(['data']);
+        $deleteditem = CategoryModel::find($ids);
+        $validator = Validator::make($input, [
+            "data" => "required"
+        ]);
+
+        if ($validator->fails()) {
+            return $this->unprocess($validator->errors()->first());
+        }
+
+        try {
+            $ids = $input['data'];
+            $item = CategoryModel::whereIn('id', $ids)->delete();
+            return $this->success($deleteditem, 'items are deleted');
+        } catch (QueryException $e) {
+            return $this->unknown();
+        }
+    }
+
+    public function category(Request $request)
+    {
         $id = $request->id;
 
         try {
-            $category = CategoryModel::find($id);
+            $category = CategoryModel::with(['items'])->find($id);
 
-            if(!$category) {
-                $response = ApiResponse::NotFound('category is not found');
-                return response()->json($response['json'], $response['status']);
+            if (!$category) {
+                return $this->notFound('category is not found');
             }
 
-            $response = ApiResponse::Success($category, 'category is retrived');
-            return response()->json($response['json'], $response['status']);
+            return $this->success($category, 'category is retrived');
         } catch (QueryException $e) {
-            $response = ApiResponse::Unknown('someting was wrong');
-            return response()->json($response['json'], $response['status']);
+            return $this->unknown();
         }
     }
 }

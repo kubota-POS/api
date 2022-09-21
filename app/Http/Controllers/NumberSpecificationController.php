@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Validator;
 use Carbon\Carbon;
 use App\Models\NumberSpecificationModel;
 use App\Models\HistoryLogModel;
 use Illuminate\Support\Facades\Auth;
 use App\HttpResponse\ApiResponse;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Validator;
 
 class NumberSpecificationController extends Controller
 {

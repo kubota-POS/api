@@ -14,21 +14,20 @@ class LicenseValidator {
     */
     public static function check($license) {
 
-        if(count($license) === 0) {
+        if(!$license) {
            return ApiResponse::Success([],'license does not exist');
         }
 
         try {
-            $decrypted = Crypt::decryptString($license[0]['token']);
+            $decrypted = Crypt::decrypt($license->token);
             $decode_json = json_decode($decrypted);
-            $plan = $decode_json->plan;
 
-            if($plan->active === false) {
+            if($decode_json->active === false) {
                 return ApiResponse::UnProcess('license is not active');
             }
 
             $current = Carbon::now()->timestamp;
-            $expired = Carbon::create($plan->expired_at)->timestamp;
+            $expired = Carbon::create($decode_json->expired_date)->timestamp;
 
             if($expired < $current) {
                 return ApiResponse::UnProcess('licnese is expired');
@@ -66,6 +65,7 @@ class LicenseValidator {
         $input['plan']['expired_at'] = Carbon::create($plan['activated_at'])->addYear($plan['duration'])->format('Y-m-d');
 
         $json_string = json_encode($input);
+        
         $data = [
             'register' => $input,
             'encrypt_code' => Crypt::encryptString($json_string),
