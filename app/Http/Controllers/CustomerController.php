@@ -20,12 +20,9 @@ class CustomerController extends Controller
         try {
 
             $customer = CustomerModel::with(['invoice', 'credit'])->get();
-            $response = ApiResponse::Success($customer, 'get customer list');
-            
-            return response()->json($response['json'], $response['status']);
+            return $this->Success($customer, 'get customer list');
         } catch (QueryException $e) {
-            $response = ApiResponse::Unknown('something was wrong');
-            return response()-json($response['json'], $response['status']);
+            return $this->Unknown('something was wrong');
         }
     }
     
@@ -39,17 +36,14 @@ class CustomerController extends Controller
         ]);
 
         if($validator->fails()){
-            $response = ApiResponse::BedRequest($validator->errors()->first());
-            return response()->json($response['json'], $response['status']);
+            return $this->unprocess($validator->errors()->first());
         }
 
         try{
             $customer = CustomerModel::create($input);
-            $response = ApiResponse::Success($customer, 'get customer list');
-            return response()->json($response['json'], $response['status']);
+            return $this->success($customer , 'get customer list' ,201);
         } catch (QueryException $e){
-            $response = ApiResponse::Unknow('something was wrong');
-            return response()->json($response['json'],$response['status']);
+            return $this->Unknow('something was wrong');
         }
     }
 
@@ -61,15 +55,12 @@ class CustomerController extends Controller
             $customer = CustomerModel::find($id);
 
             if(!$customer){
-                $response = ApiResponse::NotFound('customer is not found');
-                return response()->json($response['json'], $response['status']);
+                return $this->NotFound('customer is not found');
             }
 
-            $response = ApiResponse::Success($customer, 'customer is retrived');
-            return response()->json($response['json'], $response['status']);
+            return $this->Success($customer, 'customer is retrived');
         } catch (QueryException $e) {
-            $response = ApiResponse::Unknown('something was wrong');
-            return response()->json($response['json'], $response['status']);
+            return $this->Unknown('something was wrong');
         }
     }
     
@@ -83,25 +74,21 @@ class CustomerController extends Controller
         ]);
 
         if($validator->fails()){
-            $response = ApiResponse::BedRequest($validator->errors()->first());
-            return response()->json($response['json'], $response['status']);
+            return $this->BedRequest($validator->errors()->first());
         }
 
         try {
             $customer = CustomerModel::find($id);
 
             if(!$customer){
-                $response = ApiResponse::NotFound('customer is not found');
-                return response()->json($response['json'], $response['status']);
+                return $this->NotFound('customer is not found');
             }
 
             $update = CustomerModel::where('id', '=', $id)->update($input);
             $customer->refresh();
-            $response = ApiResponse::Success($customer, 'get updated customer');
-            return response()->json($response['json'], $response['status']);
+            return $this->Success($customer, 'get updated customer');
         } catch (QueryException $e) {
-            $response = ApiResponse::Unknown('something was wrong');
-            return response()->json($response['json'], $response['status']);
+            return $this->Unknown('something was wrong');
         }
     }
 
@@ -113,16 +100,13 @@ class CustomerController extends Controller
             $customer = CustomerModel::find($id);
 
             if(!$customer){
-                $response = ApiResponse::NotFound('customer is not found');
-                return response()->json($response['json'], $response['status']);
+                return $this->NotFound('customer is not found');
             }
 
             $customer->delete();
-            $response = ApiResponse::Success($customer, 'customer is deleted');
-            return response()->json($response['json'], $response['status']);
+            return $this->Success($customer, 'customer is deleted');
         } catch (QueryException $e) {
-            $response = ApiResponse::Unknown('something was wrong');
-            return response()->json($response['json'], $response['status']);
+            return $this->Unknown('something was wrong');
         }
     }
 
@@ -136,18 +120,15 @@ class CustomerController extends Controller
         ]);
 
         if($validator->fails()){
-            $response = ApiResponse::BedRequest($validator->errors()->first());
-            return response()->json($response['json'], $response['status']);
+            return $this->BedRequest($validator->errors()->first());
         }
 
         try {
             $ids = $input['data'];
             $customer = CustomerModel::whereIn('id',$ids)->delete();
-            $response = ApiResponse::Success($deletedCustomer, 'Customers are deleted');
-            return response()->json($response['json'], $response['status']);
+            return $this->Success($deletedCustomer, 'Customers are deleted');
         } catch (QueryException $e) {
-            $response = ApiResponse::Unknown('something was wrong');
-            return response()->json($response['json'], $response['status']);
+            return $this->Unknown('something was wrong');
         }
     }
 }

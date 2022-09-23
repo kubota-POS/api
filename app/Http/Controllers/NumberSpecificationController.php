@@ -20,11 +20,9 @@ class NumberSpecificationController extends Controller
     public function index () {
         try {
             $numberSpecification = NumberSpecificationModel::get();
-            $response = ApiResponse::Success($numberSpecification, 'get number specification list');
-            return response()->json($response['json'], $response['status']);
+            return $this->Success($numberSpecification, 'get number specification list');
         } catch (QueryException $e) {
-            $response = ApiResponse::Unknown('someting was wrong');
-            return response()->json($response['json'], $response['status']);
+            return $thit->Unknown('someting was wrong');
         }
     }
 
@@ -55,8 +53,7 @@ class NumberSpecificationController extends Controller
         ]);
 
         if ($validator->fails()) {
-            $response = ApiResponse::BedRequest($validator->errors()->first());
-            return response()->json($response['json'], $response['status']);
+            return $this->BedRequest($validator->errors()->first());
         }
 
         $input['set_char'] = strtoupper($input['set_char']);
@@ -77,17 +74,12 @@ class NumberSpecificationController extends Controller
             try {
                 $update = $setNumber->push();
                 $saveRecord = HistoryLogModel::create($history);
-
-                $response = ApiResponse::Success($setNumber, 'number specification is updated');
-                return response()->json($response['json'], $response['status']);
+                return $this->Success($setNumber, 'number specification is updated');
     
             } catch(QueryException $e) {
-                $response = ApiResponse::Unknown('something was wrong');
-                return response()->json($response['json'], $response['status']);
+                return $this->Unknown('something was wrong');
             }
         }
-
-        $response = ApiResponse::NotFound('number specification not found');
-        return response()->json($response['json'], $response['status']);
+        return $this->NotFound('number specification not found');
     }
 }

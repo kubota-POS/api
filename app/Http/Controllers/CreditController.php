@@ -20,11 +20,9 @@ class CreditController extends Controller
     {
         try {
             $credits = CreditModel::with(['invoice'])->get();
-            $response = ApiResponse::Success($credits, 'get credits list');
-            return response()->json($response['json'], $response['status']);
+            return $this->Success($credits, 'get credits list');
         } catch (QueryException $e) {
-            $response = ApiResponse::Unknown('something was wrong');
-            return response()->json($response['json'], $response['status']);
+            return $this->unknown();
         }
     }
 
@@ -35,15 +33,12 @@ class CreditController extends Controller
             $credit = CreditModel::where('invoice_id',$request->id)->with(['invoice'])->get()->first();
 
             if(!$credit){
-                $response = ApiResponse::NotFound('Credit not found');
-                return response()->json($response['json'], $response['status']);
+                return $this->NotFound('Credit not found');
             }
 
             $credit->repayment = json_decode($credit->repayment);
             $credit->invoice->invoice_data = json_decode($credit->invoice->invoice_data);
-
-            $response = ApiResponse::Success($credit, 'get credit list');
-            return response()->json($response['json'], $response['status']);
+            return $this->Success($credit, 'get credit list');
         } catch (QueryException $e) {
             return $this->unknown();
         }
@@ -59,8 +54,8 @@ class CreditController extends Controller
         ]);
 
         if($validator->fails()){
-            $response = ApiResponse::BedRequest($validator->errors()->first());
-            return response()->json($response['json'], $response['status']);
+            return $this->BedRequest($validator->errors()->first());
+            
         }
 
         $input['pay_date'] = Carbon::now();
@@ -70,8 +65,7 @@ class CreditController extends Controller
             $credit = CreditModel::find($request->id);
 
             if(!$credit){
-                $response = ApiResponse::NotFound('Credit not found');
-                return response()->json($response['json'], $response['status']);
+                return $this->NotFound('Credit not found');
             }
 
             $data = json_decode($credit->repayment);
@@ -79,13 +73,10 @@ class CreditController extends Controller
 
 
             $credit = CreditModel::where('id',$request['id'])->update(['repayment'=> json_encode($data)]);
-            
-            $response = ApiResponse::Success($credit, 'get credit list');
-            return response()->json($response['json'], $response['status']);
+            return $this->Success($credit, 'get credit list');
 
         }catch (QueryException $e) {
-            $response = ApiResponse::Unknown('something was wrong');
-            return response()->json($response['json'], $response['status']);
+            return $this->Unknown('something was wrong');
         }
     }
 }

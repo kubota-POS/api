@@ -33,12 +33,9 @@ class HistoryLogController extends Controller
                 'type' => $type,
                 'history' => $history_logs
             ];
-
-            $response = ApiResponse::Success($data, 'get history log');
-            return response()->json($response['json'], $response['status']);
+            return $this->Success($data, 'get history log');
         } catch (QueryException $e) {
-            $response = ApiResponse::Unknown('someting was wrong');
-            return response()->json($response['json'], $response['status']);
+            return $this->Unknown('someting was wrong');
         }
     }
 
@@ -52,17 +49,14 @@ class HistoryLogController extends Controller
         ]);
 
         if ($validator->fails()) {
-            $response = ApiResponse::BedRequest($validator->errors()->first());
-            return response()->json($response['json'], $response['status']);
+            return $this->BedRequest($validator->errors()->first());
         }
 
         try {
             $newHistoryLog = HistoryLogModel::create($input);
-            $response = ApiResponse::Success($newHistoryLog, 'historylog is created');
-            return response()->json($response['json'], $response['status']);
+            return $this->Success($newHistoryLog, 'historylog is created');
         } catch (QueryException $e) {
-            $response = ApiResponse::Unknown('someting was wrong');
-            return response()->json($response['json'], $response['status']);
+            return $this->Unknown('someting was wrong');
         }
     }
 }
