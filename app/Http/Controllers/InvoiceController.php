@@ -223,7 +223,7 @@ class InvoiceController extends Controller
         }
     }
 //test for store fakeDate
-    public function test(Request $request)
+    public function test(Request $request )
     {
         $input = $request->only(['created_at','invoice_id', 'customer_id', 'invoice_data', 'total_amount','discount','cash_back']);
 
