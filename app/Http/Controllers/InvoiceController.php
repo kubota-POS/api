@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Validator;
+
 use App\Models\CreditModel;
 use App\Models\CustomerModel;
 use App\Models\InvoiceModel;
@@ -13,6 +13,7 @@ use App\HttpResponse\ApiResponse;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Database\QueryException;
 use \Carbon\Carbon;
+use Illuminate\Support\Facades\Validator;
 
 class InvoiceController extends Controller
 {
@@ -27,16 +28,12 @@ class InvoiceController extends Controller
             $invoice = InvoiceModel::with(['customer','credit'])->get();
 
             if(!$invoice){
-                $response = ApiResponse::Success([], 'No invoice data');
-                return response()->json($response['json'], $response['status']);
+                return $this->success( [], 'No invoice data');
             }
             
-            $response = ApiResponse::Success($invoice, 'get invoice list');
-
-            return response()->json($response['json'], $response['status']);
+            return $this->success($invoice, 'get invoice list');
         } catch (QueryException $e) {
-            $response = ApiResponse::Unknown('something was wrong');
-            return response()->json($response['json'], $response['status']);
+            return $this->Unknown('something was wrong');
         }
     }
 
@@ -45,11 +42,9 @@ class InvoiceController extends Controller
     {
         try {
             $invoice = InvoiceModel::latest()->first();
-            $response = ApiResponse::Success($invoice, 'get invoice list');
-            return response()->json($response['json'], $response['status']);
+            return $this->success($invoice, 'get invoice list');
         } catch(QueryException $e) {
-            $response = ApiResponse::Unknown('something was wrong');
-            return response()->json($response['json'], $response['status']);
+            return $this->unknown();
         }
     }
     
@@ -76,8 +71,7 @@ class InvoiceController extends Controller
         ]);
 
         if($validator->fails()){
-            $response = ApiResponse::BedRequest($validator->errors()->first());
-            return response()->json($response['json'], $response['status']);
+            return $this->unprocess($validator->errors()->first());
         }
 
         $updateItem = new ItemModel;
@@ -134,8 +128,7 @@ class InvoiceController extends Controller
             return response()->json($response['json'], $response['status']);
             
         } catch (QueryException $e){
-            $response = ApiResponse::Unknown('unknown error');
-            return response()->json($response['json'], $response['status']); 
+            return $this->unknown('unknown error');
         }
     }
     
@@ -148,16 +141,13 @@ class InvoiceController extends Controller
             $invoice = InvoiceModel::find($id);
 
             if(!$invoice){
-                $response = ApiResponse::NotFound('invoice is not found');
-                return response()->json($response['json'], $response['status']);
+                return $this->notFound('invoice is not found');
             }
 
             $invoice->delete();
-            $response = ApiResponse::Success($invoice, 'invoice is deleted');
-            return response()->json($response['json'], $response['status']);
+            return $this->success($invoice, 'invoice is deleted');
         } catch (QueryException $e) {
-            $response = ApiResponse::Unknown('something was wrong');
-            return response()->json($response['json'], $response['status']);
+            return $this->unknown();
         }
     }
 //restore deleted invoice
@@ -166,18 +156,15 @@ class InvoiceController extends Controller
         $invoice = InvoiceModel::onlyTrashed()->first();
 
         if(!$invoice){
-            $response = ApiResponse::NotFound('No deleted invoice data');
-            return response()->json($response['json'], $response['status']);
+            return $this->NotFound('No deleted invoice data');
         }
 
         try {
             $invoice = InvoiceModel::onlyTrashed()->restore();
             $invoice = InvoiceModel::all();
-            $response = ApiResponse::Success($invoice, 'Restore Success');
-            return response()->json($response['json'], $response['status']);
+            return $this->success($invoice, 'Restore Success');
         } catch (QueryException $e) {
-            $response = ApiResponse::Unknown('something was wrong');
-            return response()->json($response['json'], $response['status']);
+            return $this->unknown();
         }
     }
 //show deleted invoice list
@@ -187,16 +174,13 @@ class InvoiceController extends Controller
             $invoice = InvoiceModel::onlyTrashed()->first();
 
             if(!$invoice){
-                $response = ApiResponse::NotFound('No deleted invoice data');
-                return response()->json($response['json'], $response['status']);
+                return $this->notFound('No deleted invoice data');
             }
             
             $invoice = InvoiceModel::onlyTrashed()->get();
-            $response = ApiResponse::Success($invoice, 'deleted invoice list');
-            return response()->json($response['json'], $response['status']);
+            return $this->success($invoice, 'deleted invoice list');
         } catch (QueryException $e) {
-            $response = ApiResponse::Unknown('something was wrong');
-            return response()->json($response['json'], $response['status']);
+            return $this->unknown('something was wrong');
         }
     }
 //Permanently Delete
@@ -215,8 +199,7 @@ class InvoiceController extends Controller
             return response()->json($response['json'], $response['status']);
 
         } catch(QueryException $e) {
-            $response = ApiResponse::Unknown('someting was wrong');
-            return response()->json($response['json'], $response['status']);
+            return $this->unknown('someting was wrong');
         }
     }
 //List by Date filter
@@ -229,29 +212,24 @@ class InvoiceController extends Controller
         ]);
 
         if($validator->fails()){
-            $response = ApiResponse::BedRequest($validator->errors()->first());
-            return response()->json($response['json'], $response['status']);
+            return $this->unprocesss($validator->errors()->first());
         }
         try {
             $start=$request->start_date;
             $end=$request->end_date;
             $get = InvoiceModel::whereBetween('created_at', [$start, $end])->with(['credit'])->get()->all();
-            $response = ApiResponse::Success($get, 'get invoice list');
-            return response()->json($response['json'], $response['status']);   
+            return $this->success($get, 'get invoice list');
         } catch (QueryException $e) {
-            $response = ApiResponse::Unknown('someting was wrong');
-            return response()->json($response['json'], $response['status']);
+            return $this->unknown();
         }
     }
 //test for store fakeDate
-    public function test(Request $request)
+    public function test(Request $request )
     {
         $input = $request->only(['created_at','invoice_id', 'customer_id', 'invoice_data', 'total_amount','discount','cash_back']);
 
             $invoice = InvoiceModel::create($input);
-         
-            $response = ApiResponse::Success($invoice, 'get invoice list');
-            return response()->json($response['json'], $response['status']);
+            return $this->success($invoice, 'get invoice list');
     }
 //ExcelExport
     public function export() 

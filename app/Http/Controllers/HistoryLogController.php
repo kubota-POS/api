@@ -3,11 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Validator;
 use App\Models\HistoryLogModel;
-use Illuminate\Support\Facades\Auth;
-use App\HttpResponse\ApiResponse;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Validator;
 
 class HistoryLogController extends Controller
 {
@@ -33,12 +31,9 @@ class HistoryLogController extends Controller
                 'type' => $type,
                 'history' => $history_logs
             ];
-
-            $response = ApiResponse::Success($data, 'get history log');
-            return response()->json($response['json'], $response['status']);
+            return $this->success($data, 'get history log');
         } catch (QueryException $e) {
-            $response = ApiResponse::Unknown('someting was wrong');
-            return response()->json($response['json'], $response['status']);
+            return $this->unknown();
         }
     }
 
@@ -52,17 +47,14 @@ class HistoryLogController extends Controller
         ]);
 
         if ($validator->fails()) {
-            $response = ApiResponse::BedRequest($validator->errors()->first());
-            return response()->json($response['json'], $response['status']);
+            return $this->unprocess($validator->errors()->first());
         }
 
         try {
             $newHistoryLog = HistoryLogModel::create($input);
-            $response = ApiResponse::Success($newHistoryLog, 'historylog is created');
-            return response()->json($response['json'], $response['status']);
+            return $this->success($newHistoryLog, 'historylog is created');
         } catch (QueryException $e) {
-            $response = ApiResponse::Unknown('someting was wrong');
-            return response()->json($response['json'], $response['status']);
+            return $this->unknown();
         }
     }
 }

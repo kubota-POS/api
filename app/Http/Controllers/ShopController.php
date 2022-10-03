@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Validator;
 use Illuminate\Http\Request;
 use App\Models\ShopModel;
-use App\Validations\ShopValidator;
-use App\HttpResponse\ApiResponse;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Validator;
 
 class ShopController extends Controller
 {
@@ -19,12 +17,10 @@ class ShopController extends Controller
 
         try {
             $data = ShopModel::get()->first();
-            $response = ApiResponse::Success($data, 'get shop info');
-            return response()->json($response['json'], $response['status']);
+            return $this->success($data,'get shop info',200);
 
         } catch(QueryException $e) {
-            $response = ApiResponse::Unknown('something was wrong');
-            return response()->json($response['json'], $response['status']);
+            return $this->unknown();  
         }
     }
 
@@ -39,15 +35,14 @@ class ShopController extends Controller
         ]);
 
         if ($validator->fails()) {
-            $response = ApiResponse::BedRequest($validator->errors()->first());
-            return response()->json($response['json'], $response['status']);
+      
+            return $this-> unprocess($validator->errors()->first());
         }
 
         $shop = ShopModel::get()->first();
 
         if($shop) {
-            $response = ApiResponse::Unprocess('shop info is alredy exist');
-            return response()->json($response['json'], $response['status']);
+            return $this->unknown();
         }
 
         $newShop = new ShopModel;
@@ -59,12 +54,10 @@ class ShopController extends Controller
 
         try {
             $store = $newShop->save();
-            $response = ApiResponse::Success($newShop, 'shop is created');
-            return response()->json($response['json'], $response['status']);
+            return $this->suceess($newShop, 'shop is created');
 
         } catch(QueryException $e) {
-            $response = ApiResponse::Unknown('something was wrong');
-            return response()->json($response['json'], $response['status']);
+            return $this->unknown();
         }
     }
 
@@ -78,8 +71,7 @@ class ShopController extends Controller
         ]);
 
         if ($validator->fails()) {
-            $response = ApiResponse::BedRequest($validator->errors()->first());
-            return response()->json($response['json'], $response['status']);
+            return $this->unprocess($validator->errors()->first());
         }
 
         $shop = ShopModel::find($id);
@@ -93,16 +85,13 @@ class ShopController extends Controller
 
             try {
                 $update = $shop->push();
-                $response = ApiResponse::Success($shop, 'shop is updated');
-                return response()->json($response['json'], $response['status']);
+               
+                return $this->success($shop,'Shop is update');
     
             } catch(QueryException $e) {
-                $response = ApiResponse::Unknown('something was wrong');
-                return response()->json($response['json'], $response['status']);
+                return $this->unkonwn();
             }
         }
-
-        $response = ApiResponse::NotFound('shop not found');
-        return response()->json($response['json'], $response['status']);
+        return $this->notFound('shop not found');
     }
 }

@@ -39,9 +39,6 @@ class BackupController extends Controller
             $newItem = ItemModel::create($updateItem);
             array_push($itemPush, $newItem);
         }
-
-        $response = ApiResponse::Success($itemPush, 'get categories list');
-        return response()->json($response['json'], $response['status']);
-
+        return $this->success($itemPush, 'get categories list');
     }
 }

@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Validator;
 use \Carbon\Carbon;
 use App\Models\DeviceModel;
 use App\HttpResponse\ApiResponse;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Validator;
 
 class DeviceController extends Controller
 {
@@ -21,12 +21,10 @@ class DeviceController extends Controller
         try {
             $devices = DeviceModel::get();
 
-            $response = ApiResponse::Success($devices, 'get device list');
-            return response()->json($response['json'], $response['status']);
+            return $this->success($devices, 'get device list');
 
         } catch(QueryException $e) {
-            $response = ApiResponse::Unknown('someting was wrong');
-            return response()->json($response['json'], $response['status']);
+            return $this->unknown();
         }
     }
 
@@ -35,16 +33,13 @@ class DeviceController extends Controller
             $device = DeviceModel::get()->first();
 
             if($device) {
-                $response = ApiResponse::Success($device, 'first device is found');
-                return response()->json($response['json'], $response['status']);
+                return $this->success($device, 'first device is found');
             } else {
-                $response = ApiResponse::Success([], 'first device is not found');
-                return response()->json($response['json'], $response['status']);
+                return $this->success([], 'first device is not found');
             }
 
         } catch(QueryException $e) {
-            $response = ApiResponse::Unknown('something was wrong');
-            return response()->json($response['json'], $response['status']);
+            return $this->unknown();
         }
     }
 
@@ -58,8 +53,7 @@ class DeviceController extends Controller
         ]);
 
         if ($validator->fails()) {
-            $response = ApiResponse::BedRequest($validator->errors()->first());
-            return response()->json($response['json'], $response['status']);
+            return $this->unprocess($validator->errors()->first());
         }
 
         $newDevice = new DeviceModel;
@@ -72,12 +66,10 @@ class DeviceController extends Controller
 
         try {
             $store = $newDevice->save();
-            $response = ApiResponse::Success($input, 'first device is created');
-            return response()->json($response['json'], $response['status']);
+            return $this->success($input, 'first device is created');
 
         } catch(QueryException $e) {
-            $response = ApiResponse::Unknown('someting was wrong');
-            return response()->json($response['json'], $response['status']);
+            return $this->unknown('someting was wrong');
         }
     }
 
@@ -91,8 +83,7 @@ class DeviceController extends Controller
         ]);
 
         if ($validator->fails()) {
-            $response = ApiResponse::BedRequest($validator->errors()->first());
-            return response()->json($response['json'], $response['status']);
+            return $this->unprocess($validator->errors()->first());
         }
 
         $newDevice = new DeviceModel;
@@ -104,12 +95,10 @@ class DeviceController extends Controller
 
         try {
             $store = $newDevice->save();
-            $response = ApiResponse::Success($input, 'device is created');
-            return response()->json($response['json'], $response['status']);
+            return $this->success($input, 'device is created');
 
         } catch(QueryException $e) {
-            $response = ApiResponse::Unknown('someting was wrong');
-            return response()->json($response['json'], $response['status']);
+            return $this->unknown();
         }
     }
 
@@ -122,31 +111,25 @@ class DeviceController extends Controller
         ]);
         
         if ($validator->fails()) {
-            $response = ApiResponse::BedRequest($validator->errors()->first());
-            return response()->json($response['json'], $response['status']);
+            return $this->unprocess($validator->errors()->first());
         }
 
         try {
             $device = DeviceModel::find($request->id);
 
             if(!$device) {
-                $response = ApiResponse::NotFound('device not found');
-                return response()->json($response['json'], $response['status']);
+                return $this->notFound('device not found');
             }
 
             $update = DeviceModel::where('id', '=', $request->id)->update($input);
 
             if($update) {
-                $response = ApiResponse::Success($input, 'device is updated');
-                return response()->json($response['json'], $response['status']);
+                return $this->success($input, 'device is updated');
             }
-
-            $response = ApiResponse::Unprocess($input, 'update failed');
-            return response()->json($response['json'], $response['status']);
+            return $this->unprocess($input, 'update failed');
 
         } catch (QueryException $e) {
-            $response = ApiResponse::Unknown('someting was wrong');
-            return response()->json($response['json'], $response['status']);  
+            return $this->unknown();
         }
     }
 }
