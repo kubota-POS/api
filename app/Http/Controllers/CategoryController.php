@@ -14,17 +14,15 @@ class CategoryController extends Controller
         $this->middleware(['license', 'jwt.verify']);
     }
 
-    public function index () {
+    public function index (Request $request) {
+        $pageSize = $request->pageSize ? $request->pageSize : 50;
         try {
-            $categories = CategoryModel::get();
-            $response = ApiResponse::Success($categories, 'get categories list');
-            return response()->json($response['json'], $response['status']);
+            $categories = CategoryModel::orderBy('created_at', 'desc')->paginate($pageSize);
+            return $this->success($categories , 'Categories List' , 200);
         } catch (QueryException $e) {
-            $response = ApiResponse::Unknown('someting was wrong');
-            return response()->json($response['json'], $response['status']);
+            return $this->unknown();
         }
     }
-
     public function withItem (Request $request) {
         if((boolean)$request['status'] === true) {
             try {
@@ -50,7 +48,6 @@ class CategoryController extends Controller
 
         if ($validator->fails()) {
             $response = ApiResponse::BedRequest($validator->errors()->first());
-            return response()->json($response['json'], $response['status']);
         }
 
         try {
